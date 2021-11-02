@@ -1,0 +1,14 @@
+{
+  "token": "OTA0ODIxNTY5NTU2MjEzNzgw.YYBGwA.GCW_znHUMLb8Rdrx4-bG9-Zdxlg",
+  "bot": {
+    "activity": "Use @dulliag/discord-helper!",
+    "cron_pattern": "5 * * * *"
+  },
+  "message": {
+    "channel_id": "812142163990151248",
+    "role_id": "812142714652983307"
+  },
+  "commands": {
+    "prefix": "!abc"
+  }
+}
