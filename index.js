@@ -1,5 +1,4 @@
 const Discord = require('discord.js');
-const { MessageEmbed } = require('discord.js');
 const client = new Discord.Client({ intents: ['GUILDS', 'GUILD_MESSAGES'] });
 const fetch = require('node-fetch');
 const cron = require('cron').CronJob;
@@ -31,9 +30,6 @@ client.on('ready', () => {
               } else {
                 console.log(link + ' is a good link');
               }
-              // !response.redirected
-              //   ? helper.log(link + ' is a good URL!')
-              //   : helper.warn(link + ' is an invalid URL!');
 
               if (!response.redirected) {
                 const channel = client.channels.cache.find(
@@ -115,9 +111,6 @@ client.on('messageCreate', (msg) => {
                   helper.error(link, ' is not reachable!');
                   return;
                 }
-                !response.redirected
-                  ? helper.log(link + ' is a good URL!')
-                  : helper.warn(link + ' is an invalid URL!');
 
                 if (!response.redirected) {
                   const channel = client.channels.cache.find(
