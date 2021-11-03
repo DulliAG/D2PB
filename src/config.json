@@ -1,0 +1,11 @@
+{
+  "token": "OTA0ODIxNTY5NTU2MjEzNzgw.YYBGwA.GCW_znHUMLb8Rdrx4-bG9-Zdxlg",
+  "bot": {
+    "activity": "Checking for Dota2 patches!",
+    "cron_pattern": "5 * * * *"
+  },
+  "message": {
+    "channel_name": "dota-updates",
+    "role_name": "dota"
+  }
+}
