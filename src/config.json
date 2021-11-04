@@ -5,7 +5,8 @@
     "cron_pattern": "5 * * * *"
   },
   "message": {
-    "channel_name": "dota-updates",
+    "channel_changelog_name": "dota-changelogs",
+    "channel_update_name": "dota-updates",
     "role_name": "dota"
   }
 }

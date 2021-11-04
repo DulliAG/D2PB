@@ -70,7 +70,7 @@ client.on('ready', () => {
               r.name.toLowerCase().includes(message.role_name.toLocaleLowerCase()) &&
               !r.name.includes('Dota2 Patches')
           );
-          let msg = `${role}` ?? '';
+          let msg = role ? `${role}` : '';
           Object.keys(pnote)
             .filter((key) => {
               return (
@@ -136,17 +136,52 @@ client.on('ready', () => {
               }
             });
 
+          const embed = {
+            color: 0x0099ff,
+            title: `Patch ${pnote.patch_name}`,
+            url: `https://www.dota2.com/patches/${pnote.patch_name}`,
+            description: 'There is a new patch!',
+            thumbnail: {
+              url: 'https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/global/dota2_logo_symbol.png',
+            },
+            fields: [
+              {
+                name: 'Patch',
+                value: pnote.patch_name,
+                inline: true,
+              },
+              {
+                name: 'Patch notes',
+                value: `[Here](https://www.dota2.com/patches/${pnote.patch_name})`,
+                inline: true,
+              },
+            ],
+          };
+
+          // Send update notification
+          const updateChannel = guild.channels.cache.filter(
+            (c) =>
+              c.isText &&
+              c.name.toLowerCase().includes(message.channel_update_name.toLocaleLowerCase())
+          );
+          if (updateChannel) {
+            updateChannel.forEach((ch) => {
+              role
+                ? ch.send({ content: `${role}`, embeds: [embed] }).catch((err) => helper.error(err))
+                : ch.send({ embeds: [embed] }).catch((err) => helper.error(err));
+            });
+          }
+
+          // Send changelogs
           Discord.Util.splitMessage(msg, { maxLength: 2000 }).forEach((splittedMessage) => {
-            const channel = guild.channels.cache.filter(
+            const changelogChannels = guild.channels.cache.filter(
               (c) =>
-                c.isText && c.name.toLowerCase().includes(message.channel_name.toLocaleLowerCase())
+                c.isText &&
+                c.name.toLowerCase().includes(message.channel_changelog_name.toLocaleLowerCase())
             );
-            if (channel) {
-              channel.forEach((ch) =>
-                ch
-                  .send(splittedMessage)
-                  .then(() => {})
-                  .catch((err) => helper.error(err))
+            if (changelogChannels) {
+              changelogChannels.forEach((ch) =>
+                ch.send(splittedMessage).catch((err) => helper.error(err))
               );
             }
           });
@@ -164,7 +199,7 @@ client.on('ready', () => {
       helper.error(error);
     }
   });
-  // task.fireOnTick(false); // Only for dev-purposes
+  task.fireOnTick(false);
   task.start();
 });
 

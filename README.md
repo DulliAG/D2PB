@@ -14,10 +14,12 @@
    git clone https://github.com/DulliAG/URL-Discord-Bot.git
    ```
 
-2. Erstellen einer `list.json`
+2. Erstellen einer `last_patch.json`
+
+   > Gibt an ab welcher Patch zuletzt geprüft wurde
 
    ```json
-   []
+   { "patch": "7.30e" }
    ```
 
 3. Erstellen einer `config.json`
@@ -29,15 +31,13 @@
    {
      "token": "ENTER_BOT_TOKEN",
      "bot": {
-       "activity": "Use @dulliag/discord-helper!",
+       "activity": "Checking for Dota2 patches!",
        "cron_pattern": "5 * * * *"
      },
      "message": {
-       "channel_id": "ENTER_CHANNEL_ID",
-       "role_id": "ENTER_ROLE_ID"
-     },
-     "commands": {
-       "prefix": "!abc"
+       "channel_changelog_name": "dota-changelogs",
+       "channel_update_name": "dota-updates",
+       "role_name": "dota"
      }
    }
    ```
