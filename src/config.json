@@ -1,8 +1,12 @@
 {
-  "token": "OTA0ODIxNTY5NTU2MjEzNzgw.YYBGwA.GCW_znHUMLb8Rdrx4-bG9-Zdxlg",
+  "token_original": "OTA0ODIxNTY5NTU2MjEzNzgw.YYBGwA.GCW_znHUMLb8Rdrx4-bG9-Zdxlg",
+  "token": "OTA2MjAwODY3MDMwNTg1MzY0.YYVLUw.Dj89gYHVVQay_Cijn2JSbJRG10E",
   "bot": {
     "activity": "Checking for Dota2 patches!",
     "cron_pattern": "*/5 * * * *"
+  },
+  "commands": {
+    "prefix": "!d2"
   },
   "message": {
     "channel_changelog_name": "dota-changelogs",
