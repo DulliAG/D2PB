@@ -11,12 +11,12 @@ const dota = new Dota2();
 const { version } = require('../package.json');
 const { token, bot, commands, message } = require('./config.json');
 
-const PRODUCTION = false;
+const PRODUCTION = true;
 
 client.on('ready', () => {
   if (PRODUCTION) helper.log(`${client.user.tag} is running in production mode!`);
   helper.log(`Logged in as ${client.user.tag}!`);
-  if (!PRODUCTION) logger.log('Bot started', `${client.user.tag} started!`);
+  if (PRODUCTION) logger.log('Bot started', `${client.user.tag} started!`);
 
   client.user.setActivity('Checking for patches...', { type: 'WATCHING' });
   client.user.setStatus('online');
@@ -32,7 +32,7 @@ client.on('ready', () => {
 
   const task = new cron(bot.cron_pattern, async () => {
     try {
-      if (!PRODUCTION) logger.log('Fetching4Patches', 'Start fetching for new Dota 2 patches!');
+      if (PRODUCTION) logger.log('Fetching4Patches', 'Start fetching for new Dota 2 patches!');
 
       const items = await dota.getItemList();
       const heroes = await dota.getHeroList();
@@ -48,7 +48,7 @@ client.on('ready', () => {
           }
 
           helper.log(`New Dota patch ${pnote.patch_name} is avaiable!`);
-          if (!PRODUCTION) logger.log(`New Dota patch ${pnote.patch_name} is avaiable!`);
+          if (PRODUCTION) logger.log(`New Dota patch ${pnote.patch_name} is avaiable!`);
 
           client.guilds.cache.forEach((guild) => {
             const role = guild.roles.cache.find(
@@ -184,26 +184,26 @@ client.on('ready', () => {
                     embeds: [embed],
                   })
                     .then(() => {
-                      if (!PRODUCTION)
+                      if (PRODUCTION)
                         logger.log(
                           'Message sent',
                           `Send patch notification on Guild ${guild.name}!`
                         );
                     })
                     .catch((err) => {
-                      if (!PRODUCTION) logger.error('Message sent failed', err);
+                      if (PRODUCTION) logger.error('Message sent failed', err);
                     });
                 } else {
                   ch.send({ embeds: [embed] })
                     .then(() => {
-                      if (!PRODUCTION)
+                      if (PRODUCTION)
                         logger.log(
                           'Message sent',
                           `Send patch notification on Guild ${guild.name}!`
                         );
                     })
                     .catch((err) => {
-                      if (!PRODUCTION) logger.error('Message sent failed', err);
+                      if (PRODUCTION) logger.error('Message sent failed', err);
                     });
                 }
               });
@@ -221,11 +221,11 @@ client.on('ready', () => {
                   ch
                     .send(splittedMessage)
                     .then(() => {
-                      if (!PRODUCTION)
+                      if (PRODUCTION)
                         logger.log('Message sent', `Send patch changelogs on Guild ${guild.name}`);
                     })
                     .catch((err) => {
-                      if (!PRODUCTION) logger.error('Message sent failed', err);
+                      if (PRODUCTION) logger.error('Message sent failed', err);
                     })
                 );
               }
@@ -243,7 +243,7 @@ client.on('ready', () => {
       });
     } catch (error) {
       helper.error(error);
-      if (!PRODUCTION) logger.error('Fetching4Patches', error);
+      if (PRODUCTION) logger.error('Fetching4Patches', error);
     }
   });
   task.fireOnTick();
@@ -255,8 +255,7 @@ client.on('messageCreate', (msg) => {
 
   const messageContent = msg.content;
   if (messageContent.substr(0, commands.prefix.length) !== commands.prefix) return;
-  if (!PRODUCTION)
-    logger.log('Use command', `${msg.author.tag} tried using command ${msg.content}`);
+  if (PRODUCTION) logger.log('Use command', `${msg.author.tag} tried using command ${msg.content}`);
 
   const action = messageContent.split(/ /g)[1];
   switch (action) {
@@ -356,20 +355,20 @@ client.on('messageCreate', (msg) => {
                 embeds: [embed],
               })
                 .then(() => {
-                  if (!PRODUCTION)
+                  if (PRODUCTION)
                     logger.log('Message sent', `Send patch notification on Guild ${guild.name}!`);
                 })
                 .catch((err) => {
-                  if (!PRODUCTION) logger.error('Message sent failed', err);
+                  if (PRODUCTION) logger.error('Message sent failed', err);
                 });
             } else {
               ch.send({ embeds: [embed] })
                 .then(() => {
-                  if (!PRODUCTION)
+                  if (PRODUCTION)
                     logger.log('Message sent', `Send patch notification on Guild ${guild.name}!`);
                 })
                 .catch((err) => {
-                  if (!PRODUCTION) logger.error('Message sent failed', err);
+                  if (PRODUCTION) logger.error('Message sent failed', err);
                 });
             }
           });
@@ -466,11 +465,11 @@ client.on('messageCreate', (msg) => {
               ch
                 .send(splittedMessage)
                 .then(() => {
-                  if (!PRODUCTION)
+                  if (PRODUCTION)
                     logger.log('Message sent', `Send patch changelogs on Guild ${guild.name}`);
                 })
                 .catch((err) => {
-                  if (!PRODUCTION) logger.error('Message sent failed', err);
+                  if (PRODUCTION) logger.error('Message sent failed', err);
                 })
             );
           }
