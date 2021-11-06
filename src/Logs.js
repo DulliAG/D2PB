@@ -10,5 +10,5 @@ const credentials = new DatabaseCredentials(
 
 module.exports = {
   credentials,
-  logger: new Logger(credentials, 'Bot Development Test#7399'),
+  logger: new Logger(credentials, 'Dota2PatchBot'),
 };
