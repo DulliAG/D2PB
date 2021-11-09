@@ -159,12 +159,12 @@ client.on('ready', () => {
                 },
                 {
                   name: 'Item updates',
-                  value: `${itemsUpdated} items got updated!`,
+                  value: `${itemsUpdated} items updated!`,
                   inline: true,
                 },
                 {
                   name: 'Hero updates',
-                  value: `${heroesUpdated} heroes got updated!`,
+                  value: `${heroesUpdated} heroes heroes updated!`,
                   inline: true,
                 },
               ],
@@ -330,12 +330,12 @@ client.on('messageCreate', (msg) => {
             },
             {
               name: 'Item updates',
-              value: `${itemsUpdated} items got updated!`,
+              value: `${itemsUpdated} items updated!`,
               inline: true,
             },
             {
               name: 'Hero updates',
-              value: `${heroesUpdated} heroes got updated!`,
+              value: `${heroesUpdated} heroes updated!`,
               inline: true,
             },
           ],
