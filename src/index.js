@@ -80,7 +80,7 @@ client.on('ready', () => {
                     break;
 
                   case 'items':
-                    itemsUpdated += category.length;
+                    items! += category.length;
                     changes.forEach((change) => {
                       const id = change.ability_id;
                       const item_name = items.find((i) => i.id == id).name_english_loc;
@@ -159,12 +159,12 @@ client.on('ready', () => {
                 },
                 {
                   name: 'Item updates',
-                  value: `${itemsUpdated} items updated!`,
+                  value: `${itemsUpdated} item updates!`,
                   inline: true,
                 },
                 {
                   name: 'Hero updates',
-                  value: `${heroesUpdated} heroes heroes updated!`,
+                  value: `${heroesUpdated} heroes hero updates!`,
                   inline: true,
                 },
               ],
@@ -330,12 +330,12 @@ client.on('messageCreate', (msg) => {
             },
             {
               name: 'Item updates',
-              value: `${itemsUpdated} items updated!`,
+              value: `${itemsUpdated} item updates!`,
               inline: true,
             },
             {
               name: 'Hero updates',
-              value: `${heroesUpdated} heroes updated!`,
+              value: `${heroesUpdated} hero updates!`,
               inline: true,
             },
           ],
