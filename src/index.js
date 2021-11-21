@@ -80,7 +80,7 @@ client.on('ready', () => {
                     break;
 
                   case 'items':
-                    items! += category.length;
+                    items += category.length;
                     changes.forEach((change) => {
                       const id = change.ability_id;
                       const item_name = items.find((i) => i.id == id).name_english_loc;
