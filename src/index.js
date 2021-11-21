@@ -11,7 +11,7 @@ const dota = new Dota2();
 const { version } = require('../package.json');
 const { token, bot, commands, message } = require('./config.json');
 
-const PRODUCTION = false;
+const PRODUCTION = true;
 
 client.on('ready', () => {
   if (PRODUCTION) helper.log(`${client.user.tag} is running in production mode!`);
