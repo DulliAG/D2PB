@@ -11,7 +11,7 @@ const dota = new Dota2();
 const { version } = require('../package.json');
 const { token, bot, commands, message } = require('./config.json');
 
-const PRODUCTION = true;
+const PRODUCTION = false;
 
 client.on('ready', () => {
   if (PRODUCTION) helper.log(`${client.user.tag} is running in production mode!`);
@@ -248,6 +248,85 @@ client.on('ready', () => {
   });
   task.fireOnTick();
   task.start();
+});
+
+client.on('guildCreate', (guild) => {
+  if (PRODUCTION) logger.log('Joined guild', `Joined the guild \`${guild.name}\``);
+
+  // Check if the required role & channels exists
+  // If not we're gonna create them
+  if (
+    !guild.roles.cache.find(
+      (role) =>
+        role.name.toLowerCase().includes(message.role_name.toLocaleLowerCase()) &&
+        !role.name.includes(client.user.username)
+    )
+  ) {
+    guild.roles
+      .create({
+        name: message.role_name,
+        mentionable: true,
+        color: 'DARK_RED',
+      })
+      .then(() => {
+        if (PRODUCTION)
+          logger.log(
+            'Create role',
+            `Created role \`${message.role_name}\` for guild \`${guild.name}\``
+          );
+      })
+      .catch((err) => {
+        if (PRODUCTION) logger.error('Create role', err);
+      });
+  }
+
+  if (
+    !guild.channels.cache.find((channel) =>
+      channel.name.toLowerCase().includes(message.channel_changelog_name.toLocaleLowerCase())
+    )
+  ) {
+    guild.channels
+      .create(message.channel_changelog_name, {
+        type: 'GUILD_TEXT',
+        topic: 'Patch changelogs',
+      })
+      .then(() => {
+        if (PRODUCTION)
+          logger.log(
+            'Create channel',
+            `Created channel \`${message.channel_changelog_name}\` for guild \`${guild.name}\``
+          );
+      })
+      .catch((err) => {
+        if (PRODUCTION) logger.error('Create channel', err);
+      });
+  }
+
+  if (
+    !guild.channels.cache.find((channel) =>
+      channel.name.toLowerCase().includes(message.channel_update_name.toLocaleLowerCase())
+    )
+  ) {
+    guild.channels
+      .create(message.channel_update_name, {
+        type: 'GUILD_TEXT',
+        topic: 'Patch notifications',
+      })
+      .then(() => {
+        if (PRODUCTION)
+          logger.log(
+            'Create channel',
+            `Created channel \`${message.channel_update_name}\` for guild \`${guild.name}\``
+          );
+      })
+      .catch((err) => {
+        if (PRODUCTION) logger.error('Create channel', err);
+      });
+  }
+});
+
+client.on('guildDelete', (guild) => {
+  if (PRODUCTION) logger.log('Left guild', `Left the guild \`${guild.name}\``);
 });
 
 client.on('messageCreate', (msg) => {

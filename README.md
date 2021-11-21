@@ -6,6 +6,10 @@
 | ------ | -------- |
 | NodeJS | ^16.13.0 |
 
+## Einladen
+
+Der Bot kann ganz einfach mit diesem [Link](https://discord.com/api/oauth2/authorize?client_id=906200867030585364&permissions=268437520&scope=bot) eingeladen werden.
+
 ## Installation
 
 1. Herunterladen des Quellcodes vom Discord-Bot
