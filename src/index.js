@@ -14,6 +14,7 @@ const { token, bot, commands, message } = require('./config.json');
 const PRODUCTION = true;
 
 client.on('ready', () => {
+  logger.application = client.user.tag;
   if (PRODUCTION) helper.log(`${client.user.tag} is running in production mode!`);
   helper.log(`Logged in as ${client.user.tag}!`);
   if (PRODUCTION) logger.log('Bot started', `${client.user.tag} started!`);
