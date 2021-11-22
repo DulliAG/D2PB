@@ -8,7 +8,7 @@ const credentials = new DatabaseCredentials(
   database.database
 );
 
-const LOGGER = new Logger(credentials);
+const LOGGER = new Logger(credentials, 'Dota2PatchBot');
 
 module.exports = {
   credentials,
