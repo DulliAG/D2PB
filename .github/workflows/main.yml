@@ -2,7 +2,8 @@ name: 🚀 Deploy DulliBot
 
 on:
   push:
-    branches: ['main', 'pipelines']
+    branches:
+      - main
 
 jobs:
   deploy:
