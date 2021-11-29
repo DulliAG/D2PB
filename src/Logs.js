@@ -1,11 +1,11 @@
 const { DatabaseCredentials, Logger } = require('@dulliag/logger.js');
-const { database } = require('./config.json');
+require('dotenv').config();
 
 const credentials = new DatabaseCredentials(
-  database.host,
-  database.user,
-  database.password,
-  database.database
+  process.env.DB_HOST,
+  process.env.DB_USER,
+  process.env.DB_PASSWORD,
+  process.env.DB_DATABASE
 );
 
 const LOGGER = new Logger(credentials, 'Dota2PatchBot');

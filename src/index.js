@@ -1,3 +1,4 @@
+require('dotenv').config();
 const Discord = require('discord.js');
 const client = new Discord.Client({ intents: ['GUILDS', 'GUILD_MESSAGES'] });
 const cron = require('cron').CronJob;
@@ -9,9 +10,9 @@ const Dota2 = require('./Dota2');
 const dota = new Dota2();
 
 const { version } = require('../package.json');
-const { token, bot, commands, message } = require('./config.json');
+const { bot, commands, message } = require('./config.json');
 
-const PRODUCTION = true;
+const PRODUCTION = process.env.PRODUCTION;
 
 client.on('ready', () => {
   logger.application = client.user.tag;
@@ -576,4 +577,4 @@ client.on('messageCreate', (msg) => {
   }
 });
 
-client.login(token);
+client.login(process.env.BOT_TOKEN);

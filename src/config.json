@@ -1,11 +1,4 @@
 {
-  "token": "OTA0ODIxNTY5NTU2MjEzNzgw.YYBGwA.GCW_znHUMLb8Rdrx4-bG9-Zdxlg",
-  "database": {
-    "host": "dulliag.de",
-    "user": "db_thorben",
-    "password": "!Litza321",
-    "database": "dulliag"
-  },
   "bot": {
     "activity": "Checking for Dota2 patches!",
     "cron_pattern": "*/30 * * * *"
