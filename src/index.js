@@ -34,8 +34,6 @@ client.on('ready', () => {
 
   const task = new cron(bot.cron_pattern, async () => {
     try {
-      if (PRODUCTION) logger.log('Fetching4Patches', 'Start fetching for new Dota 2 patches!');
-
       const items = await dota.getItemList();
       const heroes = await dota.getHeroList();
       fs.readFile('./src/latest_patch.json', 'utf-8', (err, data) => {
@@ -259,9 +257,7 @@ client.on('guildCreate', (guild) => {
   // If not we're gonna create them
   if (
     !guild.roles.cache.find(
-      (role) =>
-        role.name.toLowerCase().includes(message.role_name.toLocaleLowerCase()) &&
-        !role.name.includes(client.user.username)
+      (role) => role.name.toLowerCase() === message.role_name.toLocaleLowerCase()
     )
   ) {
     guild.roles
@@ -283,8 +279,8 @@ client.on('guildCreate', (guild) => {
   }
 
   if (
-    !guild.channels.cache.find((channel) =>
-      channel.name.toLowerCase().includes(message.channel_changelog_name.toLocaleLowerCase())
+    !guild.channels.cache.find(
+      (channel) => channel.name.toLowerCase() === message.channel_changelog_name.toLocaleLowerCase()
     )
   ) {
     guild.channels
