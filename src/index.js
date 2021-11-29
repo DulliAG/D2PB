@@ -301,8 +301,8 @@ client.on('guildCreate', (guild) => {
   }
 
   if (
-    !guild.channels.cache.find((channel) =>
-      channel.name.toLowerCase().includes(message.channel_update_name.toLocaleLowerCase())
+    !guild.channels.cache.find(
+      (channel) => channel.name.toLowerCase() === message.channel_update_name.toLocaleLowerCase()
     )
   ) {
     guild.channels
