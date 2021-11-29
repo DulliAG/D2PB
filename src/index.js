@@ -467,7 +467,7 @@ client.on('messageCreate', (msg) => {
             r.name.toLowerCase().includes(message.role_name.toLocaleLowerCase()) &&
             !r.name.includes('Dota2 Patches')
         );
-        let msg = role ? `${role}` : '';
+        let changelogMessage = role ? `${role}` : '';
         Object.keys(pnote)
           .filter((key) => {
             return (
@@ -480,10 +480,10 @@ client.on('messageCreate', (msg) => {
           .forEach((category) => {
             const changes = pnote[category];
             const categoryName = category.charAt(0).toUpperCase() + category.slice(1);
-            msg += `\n**${categoryName}**\n`;
+            changelogMessage += `\n**${categoryName}**\n`;
             switch (category) {
               case 'generic':
-                changes.forEach((change) => (msg += `- ${change.note}\n`));
+                changes.forEach((change) => (changelogMessage += `- ${change.note}\n`));
                 break;
 
               case 'items':
@@ -491,8 +491,8 @@ client.on('messageCreate', (msg) => {
                   const id = change.ability_id;
                   const item_name = items.find((i) => i.id == id).name_english_loc;
                   const notes = change.ability_notes;
-                  msg += `**${item_name}**\n`;
-                  notes.forEach((note) => (msg += `- ${note.note}\n`));
+                  changelogMessage += `**${item_name}**\n`;
+                  notes.forEach((note) => (changelogMessage += `- ${note.note}\n`));
                 });
                 break;
 
@@ -503,19 +503,19 @@ client.on('messageCreate', (msg) => {
                   const hero_notes = change.hero_notes;
                   const talent_notes = change.talent_notes;
                   const abilities = change.abilities;
-                  msg += `**${hero_name}**\n`;
+                  changelogMessage += `**${hero_name}**\n`;
 
                   if (hero_notes) {
-                    hero_notes.forEach((i) => (msg += `- ${i.note}\n`));
+                    hero_notes.forEach((i) => (changelogMessage += `- ${i.note}\n`));
                   }
 
                   if (talent_notes) {
-                    talent_notes.forEach((i) => (msg += `- ${i.note}\n`));
+                    talent_notes.forEach((i) => (changelogMessage += `- ${i.note}\n`));
                   }
 
                   if (abilities) {
                     abilities.forEach((i) =>
-                      i.ability_notes.forEach((note) => (msg += `- ${note.note}\n`))
+                      i.ability_notes.forEach((note) => (changelogMessage += `- ${note.note}\n`))
                     );
                   }
                 });
@@ -526,34 +526,36 @@ client.on('messageCreate', (msg) => {
                   const id = change.ability_id;
                   const item_name = items.find((i) => i.id == id).name_english_loc;
                   const notes = change.ability_notes;
-                  msg += `**${item_name}**\n`;
-                  notes.forEach((note) => (msg += `- ${note.note}\n`));
+                  changelogMessage += `**${item_name}**\n`;
+                  notes.forEach((note) => (changelogMessage += `- ${note.note}\n`));
                 });
                 break;
             }
           });
 
         // Send changelogs
-        Discord.Util.splitMessage(msg, { maxLength: 2000 }).forEach((splittedMessage) => {
-          const changelogChannels = guild.channels.cache.filter(
-            (c) =>
-              c.isText &&
-              c.name.toLowerCase().includes(message.channel_changelog_name.toLocaleLowerCase())
-          );
-          if (changelogChannels) {
-            changelogChannels.forEach((ch) =>
-              ch
-                .send(splittedMessage)
-                .then(() => {
-                  if (PRODUCTION)
-                    logger.log('Message sent', `Send patch changelogs on Guild ${guild.name}`);
-                })
-                .catch((err) => {
-                  if (PRODUCTION) logger.error('Message sent failed', err);
-                })
+        Discord.Util.splitMessage(changelogMessage, { maxLength: 2000 }).forEach(
+          (splittedMessage) => {
+            const changelogChannels = guild.channels.cache.filter(
+              (c) =>
+                c.isText &&
+                c.name.toLowerCase().includes(message.channel_changelog_name.toLocaleLowerCase())
             );
+            if (changelogChannels) {
+              changelogChannels.forEach((ch) =>
+                ch
+                  .send(splittedMessage)
+                  .then(() => {
+                    if (PRODUCTION)
+                      logger.log('Message sent', `Send patch changelogs on Guild ${guild.name}`);
+                  })
+                  .catch((err) => {
+                    if (PRODUCTION) logger.error('Message sent failed', err);
+                  })
+              );
+            }
           }
-        });
+        );
       });
       break;
 
