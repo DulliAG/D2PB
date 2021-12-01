@@ -1,4 +1,4 @@
-if ! screen -list | grep -q "TestDota2PatchBot"; then
+if ! screen -list | grep -q "Dota2PatchBot"; then
     bash ./stop.sh
 fi
 
