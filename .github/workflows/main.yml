@@ -18,7 +18,7 @@ jobs:
           server: ${{ secrets.SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          server-dir: DockerDota2PatchBot/
+          server-dir: Dota2PatchBot/
   setup:
     needs: deploy
     name: Run bot
@@ -32,7 +32,7 @@ jobs:
           password: ${{ secrets.SSH_PASSWORD }}
           port: 22
           script: |
-            cd /var/www/DockerDota2PatchBot/
+            cd /var/www/Dota2PatchBot/
             docker stop Dota2PatchBotProd
             docker container rm Dota2PatchBotProd
             docker image rm dota2patchbot
