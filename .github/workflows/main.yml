@@ -37,4 +37,4 @@ jobs:
             docker container rm Dota2PatchBotProd
             docker image rm dota2patchbot
             docker build -t dota2patchbot .
-            docker run -d --name=Dota2PatchBotProd dota2patchbot
+            docker run -itd --name=Dota2PatchBotProd dota2patchbot
