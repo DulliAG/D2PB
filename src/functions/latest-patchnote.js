@@ -10,7 +10,7 @@ const PRODUCTION = process.env.PRODUCTION;
  * @param {Discord.Guild} guild
  */
 const sendLatestPatchNotification = (guild) => {
-  const { message } = require('../config.json');
+  const { message } = require(`./config.${PRODUCTION ? 'prod' : 'dev'}.json`);
 
   dota.getLatestPatchNote().then((pnote) => {
     let genericsUpdated = 0;

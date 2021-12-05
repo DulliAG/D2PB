@@ -7,7 +7,7 @@ const PRODUCTION = process.env.PRODUCTION;
  * @param {Discord.Guild} guild
  */
 const setupRolesAndChannelsForSpecificGuild = (guild) => {
-  const { message } = require('../config.json');
+  const { message } = require(`./config.${PRODUCTION ? 'prod' : 'dev'}.json`);
 
   if (
     !guild.roles.cache.find(

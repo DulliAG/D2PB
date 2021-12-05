@@ -18,7 +18,7 @@ const {
 // Enviroment variables & configs
 const PRODUCTION = process.env.PRODUCTION;
 const { version } = require('../package.json');
-const { bot, commands } = require('./config.json');
+const { bot, commands } = require(`./config.${PRODUCTION ? 'prod' : 'dev'}.json`);
 
 client.on('ready', () => {
   // Logging

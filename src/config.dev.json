@@ -1,10 +1,11 @@
 {
   "bot": {
+    "enabled": false,
     "activity": "Checking for Dota2 patches!",
     "cron_pattern": "*/30 * * * *"
   },
   "commands": {
-    "prefix": "!d2"
+    "prefix": "!d3"
   },
   "message": {
     "channel_changelog_name": "dota-changelogs",
