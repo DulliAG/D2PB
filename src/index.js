@@ -86,8 +86,12 @@ client.on('ready', () => {
       if (PRODUCTION) logger.error('Fetching4Patches', error);
     }
   });
-  task.fireOnTick();
-  task.start();
+
+  // Only start patch checking if we have them enabled in the config
+  if (bot.enabled) {
+    task.fireOnTick();
+    task.start();
+  }
 });
 
 client.on('guildCreate', (guild) => {
