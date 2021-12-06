@@ -169,6 +169,37 @@ client.on('messageCreate', (msg) => {
       msg.reply('Bot setup successfull!');
       break;
 
+    case 'stats':
+      const botGuilds = client.guilds.cache;
+      const stats = {
+        guilds: botGuilds.reduce((prev, cur) => prev + 1, 0),
+        members: botGuilds.reduce((prev, cur) => prev + cur.memberCount, 0),
+      };
+      const embed = {
+        color: 0x0099ff,
+        title: `Statistics`,
+        fields: [
+          {
+            name: 'Guilds',
+            value: `${stats.guilds}`,
+            inline: true,
+          },
+          {
+            name: 'Members',
+            value: `${stats.members} member`,
+            inline: true,
+          },
+          {
+            name: 'Version',
+            value: `Version ${version}`,
+            inline: true,
+          },
+        ],
+      };
+
+      msg.reply({ embeds: embed });
+      break;
+
     case 'help':
     default:
       msg.reply(
@@ -177,6 +208,7 @@ client.on('messageCreate', (msg) => {
           '`latest-patch` || `patch` - Get the latest patch\n' +
           '`latest-changelog` || `changelog` - Get the latest changelog\n' +
           '`version` - Get the current version\n' +
+          '`stats` - Get some statistics about the bot\n' +
           '`setup` - Create required roles and channels for this bot\n'
       );
       break;
