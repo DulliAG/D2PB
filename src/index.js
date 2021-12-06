@@ -197,7 +197,7 @@ client.on('messageCreate', (msg) => {
         ],
       };
 
-      msg.reply({ embeds: embed });
+      msg.reply({ embeds: [embed] });
       break;
 
     case 'help':
