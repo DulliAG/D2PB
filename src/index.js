@@ -16,7 +16,7 @@ const {
 } = require('./functions/latest-patchnote');
 
 // Enviroment variables & configs
-const PRODUCTION = process.env.PRODUCTION;
+const PRODUCTION = process.env.PRODUCTION == 'true';
 const { version } = require('../package.json');
 const { bot, commands } = require(`./config.${PRODUCTION ? 'prod' : 'dev'}.json`);
 
