@@ -170,34 +170,34 @@ client.on('messageCreate', (msg) => {
       break;
 
     case 'stats':
-      // const botGuilds = client.guilds.cache;
-      // const stats = {
-      //   guilds: botGuilds.reduce((prev, cur) => prev + 1, 0),
-      //   members: botGuilds.reduce((prev, cur) => prev + cur.memberCount, 0),
-      // };
-      // const embed = {
-      //   color: 0x0099ff,
-      //   title: `Statistics`,
-      //   fields: [
-      //     {
-      //       name: 'Guilds',
-      //       value: `${stats.guilds}`,
-      //       inline: true,
-      //     },
-      //     {
-      //       name: 'Members',
-      //       value: `${stats.members} member`,
-      //       inline: true,
-      //     },
-      //     {
-      //       name: 'Version',
-      //       value: `Version ${version}`,
-      //       inline: true,
-      //     },
-      //   ],
-      // };
+      const botGuilds = client.guilds.cache;
+      const stats = {
+        guilds: botGuilds.reduce((prev, cur) => prev + 1, 0),
+        members: botGuilds.reduce((prev, cur) => prev + cur.memberCount, 0),
+      };
+      const embed = {
+        color: 0x0099ff,
+        title: `Statistics`,
+        fields: [
+          {
+            name: 'Guilds',
+            value: `${stats.guilds}`,
+            inline: true,
+          },
+          {
+            name: 'Members',
+            value: `${stats.members} member`,
+            inline: true,
+          },
+          {
+            name: 'Version',
+            value: `Version ${version}`,
+            inline: true,
+          },
+        ],
+      };
 
-      // msg.reply({ embeds: [embed] });
+      msg.reply({ embeds: [embed] });
       break;
 
     case 'help':
@@ -205,8 +205,8 @@ client.on('messageCreate', (msg) => {
       msg.reply(
         'try using: \n' +
           '`help` - Get help\n' +
-          '`latest-changelog` - Get the latest changelog\n' +
-          '`latest-patch` - Get the latest patch\n' +
+          '`latest-changelog` `changelog` - Get the latest changelog\n' +
+          '`latest-patch` `patch` - Get the latest patch\n' +
           '`version` - Get the current version\n' +
           '`setup` - Create required roles and channels for this bot\n'
       );
