@@ -10,7 +10,7 @@ const PRODUCTION = process.env.PRODUCTION;
  * @param {Discord.Guild} guild
  */
 const sendLatestPatchNotification = (guild) => {
-  const { message } = require(`./config.${PRODUCTION ? 'prod' : 'dev'}.json`);
+  const { message } = require(`../config.${PRODUCTION ? 'prod' : 'dev'}.json`);
 
   dota.getLatestPatchNote().then((pnote) => {
     let genericsUpdated = 0;
@@ -123,7 +123,7 @@ const sendLatestPatchNotification = (guild) => {
  * @param {Discord.Guild} guild
  */
 const sendLatestPatchChangelog = (guild) => {
-  const { message } = require('../config.json');
+  const { message } = require(`../config.${PRODUCTION ? 'prod' : 'dev'}.json`);
 
   dota.getLatestPatchNote().then(async (pnote) => {
     const items = await dota.getItemList();
