@@ -32,9 +32,8 @@ jobs:
           password: ${{ secrets.SSH_PASSWORD }}
           port: 22
           script: |
-            cd /var/www/Dota2PatchBot/
             docker stop Dota2PatchBotProd
             docker container rm Dota2PatchBotProd
             docker image rm dota2patchbot
             docker build -t dota2patchbot .
-            docker run -itd --name=Dota2PatchBotProd dota2patchbot
+            docker run -itd --restart unless-stopped --name=Dota2PatchBotProd dota2patchbot
