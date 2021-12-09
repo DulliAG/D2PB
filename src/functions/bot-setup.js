@@ -7,7 +7,7 @@ const PRODUCTION = process.env.PRODUCTION == 'true';
  * @param {Discord.Guild} guild
  */
 const setupRolesAndChannelsForSpecificGuild = (guild) => {
-  const { message } = require(`./config.${PRODUCTION ? 'prod' : 'dev'}.json`);
+  const { message } = require(`../config.${PRODUCTION ? 'prod' : 'dev'}.json`);
 
   // Create required roles for the bot
   if (
