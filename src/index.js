@@ -49,7 +49,7 @@ client.on('ready', () => {
     fs.writeFileSync('./src/latest_patch.json', JSON.stringify(content));
   }
 
-  const task = new cron(bot.cron_pattern, async () => {
+  const task = new cron(bot.background_tasks.FETCHING_PATCHES.execution_pattern, async () => {
     try {
       fs.readFile('./src/latest_patch.json', 'utf-8', (err, data) => {
         if (err) throw err;
@@ -88,7 +88,7 @@ client.on('ready', () => {
   });
 
   // Only start patch checking if we have them enabled in the config
-  if (bot.enabled) {
+  if (bot.background_tasks.FETCHING_PATCHES.enabled) {
     task.fireOnTick();
     task.start();
   }

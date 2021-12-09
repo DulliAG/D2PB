@@ -95,7 +95,14 @@ const sendLatestPatchNotification = (guild) => {
     // Send embed message
     const updateChannels = guild.channels.cache.filter(
       (c) =>
-        c.isText && c.name.toLowerCase().includes(message.channel_update_name.toLocaleLowerCase())
+        c.isText &&
+        c.name
+          .toLowerCase()
+          .includes(
+            message.channels
+              .find((channel) => channel.id === 'DOTA_UPDATES')
+              .name.toLocaleLowerCase()
+          )
     );
     if (updateChannels) {
       updateChannels.forEach((ch) => {
@@ -203,7 +210,13 @@ const sendLatestPatchChangelog = (guild) => {
       const changelogChannels = guild.channels.cache.filter(
         (c) =>
           c.isText &&
-          c.name.toLowerCase().includes(message.channel_changelog_name.toLocaleLowerCase())
+          c.name
+            .toLowerCase()
+            .includes(
+              message.channels
+                .find((channel) => channel.id === 'DOTA_CHANGELOGS')
+                .name.toLocaleLowerCase()
+            )
       );
       if (changelogChannels) {
         changelogChannels.forEach((ch) =>

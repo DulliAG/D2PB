@@ -1,15 +1,38 @@
 {
   "bot": {
-    "enabled": false,
-    "activity": "Checking for Dota2 patches!",
-    "cron_pattern": "*/30 * * * *"
+    "activity": "Checking for Dota2 patches and news!",
+    "background_tasks": {
+      "FETCHING_PATCHES": {
+        "enabled": false,
+        "execution_pattern": "*/30 * * * *"
+      },
+      "FETCHING_NEWS": {
+        "enabled": false,
+        "execution_pattern": "*/30 * * * *"
+      }
+    }
   },
   "commands": {
-    "prefix": "!d3"
+    "prefix": "!dev"
   },
   "message": {
-    "channel_changelog_name": "dota-changelogs",
-    "channel_update_name": "dota-updates",
+    "channels": [
+      {
+        "id": "DOTA_CHANGELOGS",
+        "name": "dota-changelogs",
+        "description": "Patch changelogs for Dota 2"
+      },
+      {
+        "id": "DOTA_UPDATES",
+        "name": "dota-updates",
+        "description": "Patch notications for Dota 2"
+      },
+      {
+        "id": "DOTA_NEWS",
+        "name": "dota-news",
+        "description": "Steam news for Dota 2"
+      }
+    ],
     "role_name": "Dota2News"
   }
 }

@@ -1,6 +1,6 @@
 const Discord = require('discord.js');
 const { logger } = require('../Logs');
-const PRODUCTION = process.env.PRODUCTION;
+const PRODUCTION = process.env.PRODUCTION == 'true';
 
 /**
  *
@@ -9,6 +9,7 @@ const PRODUCTION = process.env.PRODUCTION;
 const setupRolesAndChannelsForSpecificGuild = (guild) => {
   const { message } = require(`./config.${PRODUCTION ? 'prod' : 'dev'}.json`);
 
+  // Create required roles for the bot
   if (
     !guild.roles.cache.find(
       (role) => role.name.toLowerCase() === message.role_name.toLocaleLowerCase()
@@ -32,49 +33,30 @@ const setupRolesAndChannelsForSpecificGuild = (guild) => {
       });
   }
 
-  if (
-    !guild.channels.cache.find(
-      (channel) => channel.name.toLowerCase() === message.channel_changelog_name.toLocaleLowerCase()
-    )
-  ) {
-    guild.channels
-      .create(message.channel_changelog_name, {
-        type: 'GUILD_TEXT',
-        topic: 'Patch changelogs',
-      })
-      .then(() => {
-        if (PRODUCTION)
-          logger.log(
-            'Create channel',
-            `Created channel \`${message.channel_changelog_name}\` for guild \`${guild.name}\``
-          );
-      })
-      .catch((err) => {
-        if (PRODUCTION) logger.error('Create channel', err);
-      });
-  }
-
-  if (
-    !guild.channels.cache.find(
-      (channel) => channel.name.toLowerCase() === message.channel_update_name.toLocaleLowerCase()
-    )
-  ) {
-    guild.channels
-      .create(message.channel_update_name, {
-        type: 'GUILD_TEXT',
-        topic: 'Patch notifications',
-      })
-      .then(() => {
-        if (PRODUCTION)
-          logger.log(
-            'Create channel',
-            `Created channel \`${message.channel_update_name}\` for guild \`${guild.name}\``
-          );
-      })
-      .catch((err) => {
-        if (PRODUCTION) logger.error('Create channel', err);
-      });
-  }
+  // Create all requried channels for each category
+  message.channels.forEach((channel) => {
+    if (
+      !guild.channel.cache.find(
+        (guildChannel) => guildChannel.name.toLowerCase() === channel.name.toLowerCase()
+      )
+    ) {
+      guild.channels
+        .create(channel.name, {
+          type: 'GUILD_TEXT',
+          topic: channel.description,
+        })
+        .then(() => {
+          if (PRODUCTION)
+            logger.log(
+              'Create channel',
+              `Created channel \`${message.channel_update_name}\` for guild \`${guild.name}\``
+            );
+        })
+        .catch((err) => {
+          if (PRODUCTION) logger.error('Create channel', err);
+        });
+    }
+  });
 };
 
 /**
