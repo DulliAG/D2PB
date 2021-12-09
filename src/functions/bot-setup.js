@@ -36,7 +36,7 @@ const setupRolesAndChannelsForSpecificGuild = (guild) => {
   // Create all requried channels for each category
   message.channels.forEach((channel) => {
     if (
-      !guild.channel.cache.find(
+      !guild.channels.cache.find(
         (guildChannel) => guildChannel.name.toLowerCase() === channel.name.toLowerCase()
       )
     ) {
