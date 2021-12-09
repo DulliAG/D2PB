@@ -16,6 +16,7 @@
     "cron": "^1.8.2",
     "discord.js": "^13.3.1",
     "dotenv": "^10.0.0",
-    "node-fetch": "^2.6.0"
+    "node-fetch": "^2.6.0",
+    "steam-news": "^1.0.0"
   }
 }
