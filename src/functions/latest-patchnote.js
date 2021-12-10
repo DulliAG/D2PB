@@ -94,15 +94,10 @@ const sendLatestPatchNotification = (guild) => {
 
     // Send embed message
     const updateChannels = guild.channels.cache.filter(
-      (c) =>
-        c.isText &&
-        c.name
-          .toLowerCase()
-          .includes(
-            message.channels
-              .find((channel) => channel.id === 'DOTA_UPDATES')
-              .name.toLocaleLowerCase()
-          )
+      (guildChannel) =>
+        guildChannel.isText &&
+        guildChannel.name.toLowerCase() ===
+          message.channels.find((channel) => channel.id === 'DOTA_CHANGELOGS').name.toLowerCase()
     );
     if (updateChannels) {
       updateChannels.forEach((ch) => {
@@ -208,15 +203,10 @@ const sendLatestPatchChangelog = (guild) => {
     // Send changelogs
     Discord.Util.splitMessage(changelogMessage, { maxLength: 2000 }).forEach((splittedMessage) => {
       const changelogChannels = guild.channels.cache.filter(
-        (c) =>
-          c.isText &&
-          c.name
-            .toLowerCase()
-            .includes(
-              message.channels
-                .find((channel) => channel.id === 'DOTA_CHANGELOGS')
-                .name.toLocaleLowerCase()
-            )
+        (guildChannel) =>
+          guildChannel.isText &&
+          guildChannel.name.toLowerCase() ===
+            message.channels.find((channel) => channel.id === 'DOTA_CHANGELOGS').name.toLowerCase()
       );
       if (changelogChannels) {
         changelogChannels.forEach((ch) =>
