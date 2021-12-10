@@ -4,6 +4,7 @@ const client = new Discord.Client({ intents: ['GUILDS', 'GUILD_MESSAGES'] });
 const cron = require('cron').CronJob;
 const fs = require('fs');
 const helper = require('@dulliag/discord-helper');
+const fetch = require('node-fetch');
 
 // Classes & functions
 const { logger } = require('./Logs');
@@ -16,9 +17,10 @@ const {
 } = require('./functions/latest-patchnote');
 
 // Enviroment variables & configs
+const DOTA_APP_ID = 570;
 const PRODUCTION = process.env.PRODUCTION == 'true';
 const { version } = require('../package.json');
-const { bot, commands } = require(`./config.${PRODUCTION ? 'prod' : 'dev'}.json`);
+const { bot, commands, message } = require(`./config.${PRODUCTION ? 'prod' : 'dev'}.json`);
 
 client.on('ready', () => {
   // Logging
@@ -44,53 +46,179 @@ client.on('ready', () => {
   helper.log(`${totalMemberCount} member have access to the ${client.user.tag}!`);
 
   // Check if latest_patch.json exists
-  if (!fs.existsSync('./src/latest_patch.json')) {
-    const content = [];
-    fs.writeFileSync('./src/latest_patch.json', JSON.stringify(content));
-  }
+  if (!fs.existsSync('./src/latest_patch.json'))
+    fs.writeFileSync('./src/latest_patch.json', JSON.stringify({ patch: '' }));
 
-  const task = new cron(bot.background_tasks.FETCHING_PATCHES.execution_pattern, async () => {
-    try {
-      fs.readFile('./src/latest_patch.json', 'utf-8', (err, data) => {
-        if (err) throw err;
-        const latestPatchFile = JSON.parse(data),
-          patch = latestPatchFile.patch;
+  // Check if latest_article.json exists
+  if (!fs.existsSync('./src/latest_article.json'))
+    fs.writeFileSync('./src/latest_article.json', JSON.stringify({ article: '' }));
 
-        dota.getLatestPatchNote().then(async (pnote) => {
-          if (patch === pnote.patch_name) {
-            helper.log('No new Dota patch avaiable!');
-            return;
-          }
+  const TASK_FETCH_PATCHES = new cron(
+    bot.background_tasks.FETCHING_PATCHES.execution_pattern,
+    async () => {
+      try {
+        fs.readFile('./src/latest_patch.json', 'utf-8', (err, data) => {
+          if (err) throw err;
+          const latestPatchFile = JSON.parse(data),
+            patch = latestPatchFile.patch;
 
-          helper.log(`New Dota patch ${pnote.patch_name} is avaiable!`);
-          if (PRODUCTION) logger.log(`New Dota patch ${pnote.patch_name} is avaiable!`);
-
-          // Send notification and changelog
-          client.guilds.cache.forEach((guild) => {
-            sendLatestPatchChangelog(guild);
-            sendLatestPatchNotification(guild);
-          });
-
-          // Update local file
-          fs.writeFile(
-            './src/latest_patch.json',
-            JSON.stringify({ patch: pnote.patch_name }),
-            (err) => {
-              if (err) throw err;
+          dota.getLatestPatchNote().then(async (pnote) => {
+            if (patch === pnote.patch_name) {
+              helper.log('No new Dota patch avaiable!');
+              return;
             }
-          );
+
+            helper.log(`New Dota patch ${pnote.patch_name} is avaiable!`);
+            if (PRODUCTION) logger.log(`New Dota patch ${pnote.patch_name} is avaiable!`);
+
+            // Send notification and changelog
+            client.guilds.cache.forEach((guild) => {
+              sendLatestPatchChangelog(guild);
+              sendLatestPatchNotification(guild);
+            });
+
+            // Update local file
+            fs.writeFile(
+              './src/latest_patch.json',
+              JSON.stringify({ patch: pnote.patch_name }),
+              (err) => {
+                if (err) throw err;
+              }
+            );
+          });
         });
+      } catch (error) {
+        helper.error(error);
+        if (PRODUCTION) logger.error('Fetching4Patches', error);
+      }
+    }
+  );
+
+  const TASK_FETCH_NEWS = new cron(bot.background_tasks.FETCHING_NEWS.execution_pattern, () => {
+    try {
+      fs.readFile('./src/latest_article.json', 'utf-8', (err, data) => {
+        if (err) throw err;
+        const latestArticleFile = JSON.parse(data),
+          latestSentArticle = latestArticleFile.article;
+
+        fetch(`https://api.steampowered.com/ISteamNews/GetNewsForApp/v2/?appid=${DOTA_APP_ID}`)
+          .then((response) => response.json())
+          .then((json) => {
+            const articles = json.appnews.newsitems;
+            const latestArticle = articles[0];
+            const {
+              gid,
+              title,
+              url,
+              is_external_url,
+              author,
+              contents,
+              feedlabel,
+              date,
+              feedname,
+              feed_type,
+              appid,
+              tags = [],
+            } = latestArticle;
+
+            // Check if there is a new article for Dota 2
+            if (
+              latestSentArticle &&
+              JSON.stringify(latestSentArticle.split('+-+')) ===
+                JSON.stringify([gid, title, author, date + ''])
+            ) {
+              helper.log('There are no new articles');
+              return;
+            }
+
+            // Send news notification
+            const parsedDate = new Date(date * 1000); // transform UNIX-timestamp
+            client.guilds.cache.forEach((guild) => {
+              const newsChannel = guild.channels.cache.find(
+                (guildChannel) =>
+                  guildChannel.isText &&
+                  guildChannel.name.toLowerCase() ===
+                    message.channels
+                      .find((channel) => channel.id === 'DOTA_NEWS')
+                      .name.toLowerCase()
+              );
+              if (newsChannel) {
+                // Prepare patch notification message
+                const role = guild.roles.cache.find(
+                  (role) => role.name.toLowerCase() === message.role_name.toLocaleLowerCase()
+                );
+
+                // Prepare embed
+                const embed = {
+                  color: 0x0099ff,
+                  title: title,
+                  url: url,
+                  author: {
+                    name: author,
+                  },
+                  timestamp: parsedDate,
+                  fields: [
+                    {
+                      name: 'Provider',
+                      value: feedlabel,
+                      inline: true,
+                    },
+                    {
+                      name: 'Tags',
+                      value:
+                        tags.length > 0
+                          ? tags.reduce((prev, cur) => (prev += '`' + cur + '` '), '')
+                          : 'None',
+                      inline: true,
+                    },
+                  ],
+                };
+
+                newsChannel
+                  .send({
+                    content: role ? `${role}\n **New Dota 2 article**` : `**New Dota 2a article**`,
+                    embeds: [embed],
+                  })
+                  .then(() => {
+                    if (PRODUCTION)
+                      logger.log('Message sent', `Send news notification on Guild ${guild.name}!`);
+                  })
+                  .catch((err) => {
+                    if (PRODUCTION) logger.error('Message sent failed', err);
+                    helper.error(err);
+                  });
+              }
+            });
+
+            // Update local file
+            fs.writeFile(
+              './src/latest_article.json',
+              JSON.stringify({ article: `${gid}+-+${title}+-+${author}+-+${date}` }),
+              (err) => {
+                if (err) throw err;
+              }
+            );
+          })
+          .catch((err) => {
+            throw err;
+          });
       });
-    } catch (error) {
-      helper.error(error);
-      if (PRODUCTION) logger.error('Fetching4Patches', error);
+    } catch (err) {
+      if (PRODUCTION) logger.error('Fetching news', err);
+      helper.error(err);
     }
   });
 
   // Only start patch checking if we have them enabled in the config
   if (bot.background_tasks.FETCHING_PATCHES.enabled) {
-    task.fireOnTick();
-    task.start();
+    TASK_FETCH_PATCHES.fireOnTick();
+    TASK_FETCH_PATCHES.start();
+  }
+
+  // Only start patch checking if we have them enabled in the config
+  if (bot.background_tasks.FETCHING_NEWS.enabled) {
+    TASK_FETCH_NEWS.fireOnTick();
+    TASK_FETCH_NEWS.start();
   }
 });
 
