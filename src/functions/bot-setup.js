@@ -49,7 +49,7 @@ const setupRolesAndChannelsForSpecificGuild = (guild) => {
           if (PRODUCTION)
             logger.log(
               'Create channel',
-              `Created channel \`${message.channel_update_name}\` for guild \`${guild.name}\``
+              `Created channel \`${channel.name}\` for guild \`${guild.name}\``
             );
         })
         .catch((err) => {
