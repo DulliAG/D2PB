@@ -10,7 +10,10 @@ const fetch = require('node-fetch');
 const { logger } = require('./Logs');
 const Dota2 = require('./Dota2');
 const dota = new Dota2();
-const { setupRolesAndChannelsForSpecificGuild } = require('./functions/bot-setup');
+const {
+  setupRolesAndChannelsForSpecificGuild,
+  setupRolesAndChannelsForAnyGuild,
+} = require('./functions/bot-setup');
 const {
   sendLatestPatchNotification,
   sendLatestPatchChangelog,
@@ -30,6 +33,9 @@ client.on('ready', () => {
     logger.application = client.user.tag;
     logger.log('Bot started', `${client.user.tag} started!`);
   }
+
+  // Run bot setup
+  setupRolesAndChannelsForAnyGuild(client);
 
   // Update bot information
   client.user.setActivity(`${commands.prefix} for more...`);
