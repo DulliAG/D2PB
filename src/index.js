@@ -35,7 +35,7 @@ client.on('ready', () => {
   }
 
   // Run bot setup
-  setupRolesAndChannelsForAnyGuild(client);
+  if (PRODUCTION) setupRolesAndChannelsForAnyGuild(client);
 
   // Update bot information
   client.user.setActivity(`${commands.prefix} for more...`);
