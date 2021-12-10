@@ -29,7 +29,7 @@ client.on('ready', () => {
   // Logging
   helper.log(`Logged in as ${client.user.tag}!`);
   if (PRODUCTION) {
-    helper.log(`${client.user.tag} is running in production mode!`);
+    helper.log(`${client.user.tag} v${version} is running in production mode!`);
     logger.application = client.user.tag;
     logger.log('Bot started', `${client.user.tag} started!`);
   }
