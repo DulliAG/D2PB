@@ -8,7 +8,7 @@
       },
       "FETCHING_NEWS": {
         "enabled": false,
-        "execution_pattern": "*/30 * * * *"
+        "execution_pattern": "*/10 * * * *"
       }
     }
   },
