@@ -135,31 +135,26 @@ client.on('ready', () => {
             /**
              *
              * @param {string} gid
-             * @param {string} title
-             * @param {string} author
              * @param {string} date
              * @returns string
              */
-            const generateKey = (gid, title, author, date) => {
-              return `${gid}+-+${title.replace(/ /g, '_')}+-+${author}+-+${date}`;
+            const generateKey = (gid, date) => {
+              return `${gid}+-+${date}`;
             };
 
             /**
              *
              * @param {string} gid
-             * @param {string} title
-             * @param {string} author
              * @param {string} date
              * @returns object
              */
-            const generateArticleJson = (gid, title, author, date) => {
-              return { article: generateKey(gid, title, author, date) };
+            const generateArticleJson = (gid, date) => {
+              return { article: generateKey(gid, date) };
             };
 
             if (
               latestSentArticle &&
-              JSON.stringify(latestSentArticle) ==
-                JSON.stringify(generateKey(gid, title, author, date))
+              JSON.stringify(latestSentArticle) == JSON.stringify(generateKey(gid, date))
             ) {
               helper.log('There is no new Dota2 article!');
               return;
@@ -227,7 +222,7 @@ client.on('ready', () => {
             // Update local file
             fs.writeFile(
               './src/latest_article.json',
-              JSON.stringify(generateArticleJson(gid, title, author, date)),
+              JSON.stringify(generateArticleJson(gid, date)),
               (err) => {
                 if (err) throw err;
               }
