@@ -156,7 +156,9 @@ client.on('ready', () => {
               latestSentArticle &&
               JSON.stringify(latestSentArticle) == JSON.stringify(generateKey(gid, date))
             ) {
-              helper.log('There is no new Dota2 article!');
+              let msg = `There is no new article for Dota 2. (Latest article: ${gid})`;
+              helper.log(msg);
+              if (PRODUCTION) logger.log(msg);
               return;
             }
 
@@ -209,12 +211,13 @@ client.on('ready', () => {
                     embeds: [embed],
                   })
                   .then(() => {
-                    if (PRODUCTION)
-                      logger.log('Message sent', `Send news notification on Guild ${guild.name}!`);
+                    let msg = `Send news notification on Guild ${guild.name}!`;
+                    helper.log(msg);
+                    if (PRODUCTION) logger.log('Message sent', msg);
                   })
                   .catch((err) => {
+                    helper.error('Failed to send news-notifcation cause of:\n' + err);
                     if (PRODUCTION) logger.error('Message sent failed', err);
-                    helper.error(err);
                   });
               }
             });
