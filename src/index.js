@@ -183,7 +183,7 @@ client.on('ready', () => {
                 const embed = {
                   color: 0x0099ff,
                   title: title,
-                  url: url,
+                  url: url.replace(/ /g, '%20'),
                   author: {
                     name: author,
                   },
