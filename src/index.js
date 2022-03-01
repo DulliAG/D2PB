@@ -68,30 +68,35 @@ client.on('ready', () => {
           const latestPatchFile = JSON.parse(data),
             patch = latestPatchFile.patch;
 
-          dota.getLatestPatchNote().then(async (pnote) => {
-            if (patch === pnote.patch_name) {
-              helper.log('No new Dota patch avaiable!');
-              return;
-            }
-
-            helper.log(`New Dota patch ${pnote.patch_name} is avaiable!`);
-            if (PRODUCTION) logger.log(`New Dota patch ${pnote.patch_name} is avaiable!`);
-
-            // Send notification and changelog
-            client.guilds.cache.forEach((guild) => {
-              sendLatestPatchChangelog(guild);
-              sendLatestPatchNotification(guild);
-            });
-
-            // Update local file
-            fs.writeFile(
-              './src/latest_patch.json',
-              JSON.stringify({ patch: pnote.patch_name }),
-              (err) => {
-                if (err) throw err;
+          dota
+            .getLatestPatchNoteVersion()
+            .then((version) => {
+              if (patch === version) {
+                helper.log('No new Dota patch avaiable!');
+                return;
               }
-            );
-          });
+
+              dota.getLatestPatchNote().then(async (patchNote) => {
+                helper.log(`New Dota patch ${patchNote.patch_name} is avaiable!`);
+                if (PRODUCTION) logger.log(`New Dota patch ${patchNote.patch_name} is avaiable!`);
+
+                // Send notification and changelog
+                client.guilds.cache.forEach((guild) => {
+                  sendLatestPatchChangelog(guild);
+                  sendLatestPatchNotification(guild);
+                });
+
+                // Update local file
+                fs.writeFile(
+                  './src/latest_patch.json',
+                  JSON.stringify({ patch: patchNote.patch_name }),
+                  (err) => {
+                    if (err) throw err;
+                  }
+                );
+              });
+            })
+            .catch((err) => console.log('ERROR: ' + err));
         });
       } catch (error) {
         helper.error(error);

@@ -3,6 +3,15 @@ const fetch = require('node-fetch');
 class Dota2 {
   language = 'english';
 
+  getLatestPatchNoteVersion() {
+    return new Promise((res, rej) => {
+      fetch('https://www.dota2.com/datafeed/patchnoteslist?language=' + this.getLatestPatchNote)
+        .then((response) => response.json())
+        .then((json) => res(json.patches.pop().patch_name))
+        .catch((err) => rej(err));
+    });
+  }
+
   getPatchNoteList() {
     return new Promise((res, rej) => {
       fetch('https://www.dota2.com/datafeed/patchnoteslist?language=' + this.language)
