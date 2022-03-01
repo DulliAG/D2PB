@@ -97,7 +97,7 @@ const sendLatestPatchNotification = (guild) => {
       (guildChannel) =>
         guildChannel.isText &&
         guildChannel.name.toLowerCase() ===
-          message.channels.find((channel) => channel.id === 'DOTA_CHANGELOGS').name.toLowerCase()
+          message.channels.find((channel) => channel.id === 'DOTA_UPDATES').name.toLowerCase()
     );
     if (updateChannels) {
       updateChannels.forEach((ch) => {
