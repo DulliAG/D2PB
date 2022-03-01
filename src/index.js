@@ -289,10 +289,6 @@ client.on('messageCreate', (msg) => {
       sendLatestPatchChangelog(msg.guild);
       break;
 
-    case 'version':
-      msg.reply(`The bot is running version ${version}!`);
-      break;
-
     case 'setup':
       const guild = msg.guild;
       const guildMembers = guild.members.cache;
@@ -357,10 +353,15 @@ client.on('messageCreate', (msg) => {
       msg.reply({ embeds: [embed] });
       break;
 
+    case 'version':
+      msg.reply(`The bot is running version ${version}!`);
+      break;
+
     case 'help':
     default:
       msg.reply(
         'try using: \n' +
+          'If you wanna report a bug or suggest a feature, you can do so here (https://github.com/DulliAG-Customers/Dota2PatchBot-Discussion/)' +
           '`help` - Get help\n' +
           '`latest-changelog` `changelog` - Get the latest changelog\n' +
           '`latest-patch` `patch` - Get the latest patch\n' +
