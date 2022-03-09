@@ -1,5 +1,5 @@
 const Discord = require('discord.js');
-const { logger } = require('../Logs');
+const { log, logger } = require('../Logs');
 const PRODUCTION = process.env.PRODUCTION == 'true';
 
 /**
@@ -24,12 +24,13 @@ const setupRolesAndChannelsForSpecificGuild = (guild) => {
       .then(() => {
         if (PRODUCTION)
           logger.log(
+            log.INFORMATION,
             'Create role',
             `Created role \`${message.role_name}\` for guild \`${guild.name}\``
           );
       })
       .catch((err) => {
-        if (PRODUCTION) logger.error('Create role', err);
+        if (PRODUCTION) logger.log(log.INFORMATION, 'Create role', err);
       });
   }
 
@@ -48,12 +49,13 @@ const setupRolesAndChannelsForSpecificGuild = (guild) => {
         .then(() => {
           if (PRODUCTION)
             logger.log(
+              log.INFORMATION,
               'Create channel',
               `Created channel \`${channel.name}\` for guild \`${guild.name}\``
             );
         })
         .catch((err) => {
-          if (PRODUCTION) logger.error('Create channel', err);
+          if (PRODUCTION) logger.log(log.ERROR, 'Create channel', err);
         });
     }
   });

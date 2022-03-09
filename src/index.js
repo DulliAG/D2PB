@@ -7,7 +7,7 @@ const helper = require('@dulliag/discord-helper');
 const fetch = require('node-fetch');
 
 // Classes & functions
-const { logger } = require('./Logs');
+const { log, logger } = require('./Logs');
 const Dota2 = require('./Dota2');
 const dota = new Dota2();
 const {
@@ -31,7 +31,7 @@ client.on('ready', () => {
   if (PRODUCTION) {
     helper.log(`${client.user.tag} v${version} is running in production mode!`);
     logger.application = client.user.username;
-    logger.log('Bot started', `${client.user.tag} started!`);
+    logger.log(log.INFORMATION, 'Bot started', `${client.user.tag} started!`);
   }
 
   // Run bot setup
@@ -78,7 +78,11 @@ client.on('ready', () => {
 
               dota.getLatestPatchNote().then(async (patchNote) => {
                 helper.log(`New Dota patch ${patchNote.patch_name} is avaiable!`);
-                if (PRODUCTION) logger.log(`New Dota patch ${patchNote.patch_name} is avaiable!`);
+                if (PRODUCTION)
+                  logger.log(
+                    log.INFORMATION,
+                    `New Dota patch ${patchNote.patch_name} is avaiable!`
+                  );
 
                 // Send notification and changelog
                 client.guilds.cache.forEach((guild) => {
@@ -100,7 +104,7 @@ client.on('ready', () => {
         });
       } catch (error) {
         helper.error(error);
-        if (PRODUCTION) logger.error('Fetching4Patches', error);
+        if (PRODUCTION) logger.log(log.ERROR, 'Fetching4Patches', error);
       }
     }
   );
@@ -158,7 +162,7 @@ client.on('ready', () => {
             ) {
               let msg = `There is no new article for Dota 2. (Latest article: ${gid})`;
               helper.log(msg);
-              if (PRODUCTION) logger.log(msg);
+              if (PRODUCTION) logger.log(log.INFORMATION, 'Message', msg);
               return;
             }
 
@@ -213,11 +217,11 @@ client.on('ready', () => {
                   .then(() => {
                     let msg = `Send news notification on Guild ${guild.name}!`;
                     helper.log(msg);
-                    if (PRODUCTION) logger.log('Message sent', msg);
+                    if (PRODUCTION) logger.log(log.INFORMATION, 'Message sent', msg);
                   })
                   .catch((err) => {
                     helper.error('Failed to send news-notifcation cause of:\n' + err);
-                    if (PRODUCTION) logger.error('Message sent failed', err);
+                    if (PRODUCTION) logger.log(log.ERROR, 'Message sent failed', err);
                   });
               }
             });
@@ -236,7 +240,7 @@ client.on('ready', () => {
           });
       });
     } catch (err) {
-      if (PRODUCTION) logger.error('Fetching news', err);
+      if (PRODUCTION) logger.log(log.ERROR, 'Fetching news', err);
       helper.error(err);
     }
   });
@@ -257,6 +261,7 @@ client.on('ready', () => {
 client.on('guildCreate', (guild) => {
   if (PRODUCTION)
     logger.log(
+      log.INFORMATION,
       'Joined guild',
       `Joined the guild \`${guild.name}\`(${guild.memberCount} ${
         guild.memberCount > 1 ? 'members' : 'member'
@@ -270,15 +275,24 @@ client.on('guildCreate', (guild) => {
 
 client.on('guildDelete', (guild) => {
   if (PRODUCTION)
-    logger.log('Left guild', `Left the guild \`${guild.name}\`(${guild.memberCount} member)`);
+    logger.log(
+      log.INFORMATION,
+      'Left guild',
+      `Left the guild \`${guild.name}\`(${guild.memberCount} member)`
+    );
 });
 
 client.on('messageCreate', (msg) => {
   if (helper.isBot(msg.author)) return;
 
   const messageContent = msg.content;
-  if (messageContent.substr(0, commands.prefix.length) !== commands.prefix) return;
-  if (PRODUCTION) logger.log('Use command', `${msg.author.tag} tried using command ${msg.content}`);
+  if (messageContent.substring(0, commands.prefix.length) !== commands.prefix) return;
+  if (PRODUCTION)
+    logger.log(
+      log.INFORMATION,
+      'Use command',
+      `${msg.author.tag} tried using command ${msg.content}`
+    );
 
   const action = messageContent.split(/ /g)[1];
   switch (action) {
@@ -298,7 +312,8 @@ client.on('messageCreate', (msg) => {
       const authorAsGuildMember = guildMembers.find((member) => member.user.tag === msg.author.tag);
       if (!authorAsGuildMember) {
         if (PRODUCTION)
-          logger.error(
+          logger.log(
+            log.ERROR,
             'Bot setup',
             `\`${msg.author.tag}\` isn't a guild member of \`${guild.name}\``
           );

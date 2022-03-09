@@ -2,7 +2,7 @@ const Discord = require('discord.js');
 const Dota2 = require('../Dota2');
 const dota = new Dota2();
 const helper = require('@dulliag/discord-helper');
-const { logger } = require('../Logs');
+const { log, logger } = require('../Logs');
 const PRODUCTION = process.env.PRODUCTION;
 
 /**
@@ -109,10 +109,14 @@ const sendLatestPatchNotification = (guild) => {
         })
           .then(() => {
             if (PRODUCTION)
-              logger.log('Message sent', `Send patch notification on Guild ${guild.name}!`);
+              logger.log(
+                log.INFORMATION,
+                'Message sent',
+                `Send patch notification on Guild ${guild.name}!`
+              );
           })
           .catch((err) => {
-            if (PRODUCTION) logger.error('Message sent failed', err);
+            if (PRODUCTION) logger.log(log.ERROR, 'Message sent failed', err);
             helper.error(err);
           });
       });
@@ -214,10 +218,14 @@ const sendLatestPatchChangelog = (guild) => {
             .send(splittedMessage)
             .then(() => {
               if (PRODUCTION)
-                logger.log('Message sent', `Send patch changelogs on Guild ${guild.name}`);
+                logger.log(
+                  log.INFORMATION,
+                  'Message sent',
+                  `Send patch changelogs on Guild ${guild.name}`
+                );
             })
             .catch((err) => {
-              if (PRODUCTION) logger.error('Message sent failed', err);
+              if (PRODUCTION) logger.log(log.ERROR, 'Message sent failed', err);
               helper.error(err);
             })
         );

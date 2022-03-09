@@ -1,18 +1,18 @@
-const { DatabaseCredentials, Logger } = require('@dulliag/logger.js');
+const { Database, LogVariant, Credentials, Client } = require('@dulliag/logger.js');
 require('dotenv').config();
 
 try {
-  const credentials = new DatabaseCredentials(
+  const credentials = new Credentials(
     process.env.DB_HOST,
     process.env.DB_USER,
     process.env.DB_PASSWORD,
     process.env.DB_DATABASE
   );
 
-  const LOGGER = new Logger(credentials, 'Dota2PatchBot');
+  const LOGGER = new Client(Database.PG, credentials, 'Dota2PatchBot');
 
   module.exports = {
-    credentials,
+    log: LogVariant,
     logger: LOGGER,
   };
 } catch (err) {
