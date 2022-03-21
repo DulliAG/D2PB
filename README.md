@@ -4,7 +4,7 @@
 
 | System | Version  |
 | ------ | -------- |
-| NodeJS | ^16.13.0 |
+| NodeJS | ^16.14.2 |
 
 ## Einladen
 
