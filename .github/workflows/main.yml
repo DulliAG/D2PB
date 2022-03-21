@@ -36,5 +36,6 @@ jobs:
             docker stop Dota2PatchBotProd
             docker container rm Dota2PatchBotProd
             docker image rm dota2patchbot
+            npm i
             docker build -t dota2patchbot .
             docker run -itd --restart unless-stopped --name=Dota2PatchBotProd dota2patchbot
