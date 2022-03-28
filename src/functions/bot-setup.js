@@ -1,5 +1,6 @@
 const Discord = require('discord.js');
-const { log, logger } = require('../Logs');
+const { LogVariant } = require('@dulliag/logger.js');
+const { createLog } = require('../Logs');
 const PRODUCTION = process.env.PRODUCTION == 'true';
 
 /**
@@ -22,16 +23,13 @@ const setupRolesAndChannelsForSpecificGuild = (guild) => {
         color: 'DARK_RED',
       })
       .then(() => {
-        if (PRODUCTION)
-          logger.log(
-            log.INFORMATION,
-            'Create role',
-            `Created role \`${message.role_name}\` for guild \`${guild.name}\``
-          );
+        createLog(
+          LogVariant.INFORMATION,
+          'Create role',
+          `Created role \`${message.role_name}\` for guild \`${guild.name}\``
+        );
       })
-      .catch((err) => {
-        if (PRODUCTION) logger.log(log.INFORMATION, 'Create role', err);
-      });
+      .catch((err) => createLog(LogVariant.INFORMATION, 'Create role', err));
   }
 
   // Create all requried channels for each category
@@ -47,16 +45,13 @@ const setupRolesAndChannelsForSpecificGuild = (guild) => {
           topic: channel.description,
         })
         .then(() => {
-          if (PRODUCTION)
-            logger.log(
-              log.INFORMATION,
-              'Create channel',
-              `Created channel \`${channel.name}\` for guild \`${guild.name}\``
-            );
+          createLog(
+            LogVariant.INFORMATION,
+            'Create channel',
+            `Created channel \`${channel.name}\` for guild \`${guild.name}\``
+          );
         })
-        .catch((err) => {
-          if (PRODUCTION) logger.log(log.ERROR, 'Create channel', err);
-        });
+        .catch((err) => createLog(LogVariant.ERROR, 'Create channel', err));
     }
   });
 };

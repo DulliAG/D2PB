@@ -1,8 +1,8 @@
 const Discord = require('discord.js');
 const Dota2 = require('../Dota2');
 const dota = new Dota2();
-const helper = require('@dulliag/discord-helper');
-const { log, logger } = require('../Logs');
+const { LogVariant } = require('@dulliag/logger.js');
+const { createLog } = require('../Logs');
 const PRODUCTION = process.env.PRODUCTION;
 
 /**
@@ -108,17 +108,13 @@ const sendLatestPatchNotification = (guild) => {
           embeds: [embed],
         })
           .then(() => {
-            if (PRODUCTION)
-              logger.log(
-                log.INFORMATION,
-                'Message sent',
-                `Send patch notification on Guild ${guild.name}!`
-              );
+            createLog(
+              LogVariant.INFORMATION,
+              'Message sent',
+              `Send patch notification on Guild ${guild.name}!`
+            );
           })
-          .catch((err) => {
-            if (PRODUCTION) logger.log(log.ERROR, 'Message sent failed', err);
-            helper.error(err);
-          });
+          .catch((err) => createLog(LogVariant.ERROR, 'Message sent failed', err));
       });
     }
   });
@@ -217,17 +213,13 @@ const sendLatestPatchChangelog = (guild) => {
           ch
             .send(splittedMessage)
             .then(() => {
-              if (PRODUCTION)
-                logger.log(
-                  log.INFORMATION,
-                  'Message sent',
-                  `Send patch changelogs on Guild ${guild.name}`
-                );
+              createLog(
+                LogVariant.INFORMATION,
+                'Message sent',
+                `Send patch changelogs on Guild ${guild.name}`
+              );
             })
-            .catch((err) => {
-              if (PRODUCTION) logger.log(log.ERROR, 'Message sent failed', err);
-              helper.error(err);
-            })
+            .catch((err) => createLog(LogVariant.ERROR, 'Message sent failed', err))
         );
       }
     });

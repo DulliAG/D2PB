@@ -7,7 +7,8 @@ const helper = require('@dulliag/discord-helper');
 const fetch = require('node-fetch');
 
 // Classes & functions
-const { log, logger } = require('./Logs');
+const { LogVariant } = require('@dulliag/logger.js');
+const { logger, createLog } = require('./Logs');
 const Dota2 = require('./Dota2');
 const dota = new Dota2();
 const {
@@ -31,7 +32,7 @@ client.on('ready', () => {
   if (PRODUCTION) {
     helper.log(`${client.user.tag} v${version} is running in production mode!`);
     logger.application = client.user.username;
-    logger.log(log.INFORMATION, 'Bot started', `${client.user.tag} started!`);
+    logger.log(LogVariant.INFORMATION, 'Bot started', `${client.user.tag} started!`);
   }
 
   // Run bot setup
@@ -43,13 +44,19 @@ client.on('ready', () => {
   let totalMemberCount = 0;
   client.guilds.cache.forEach((guild) => {
     totalMemberCount += guild.memberCount;
-    helper.log(
+    createLog(
+      LogVariant.INFORMATION,
+      'Server information',
       `Bot is running on ${guild.name} with ${guild.memberCount} ${
         guild.memberCount > 1 ? 'members' : 'member'
       }!`
     );
   });
-  helper.log(`${totalMemberCount} member have access to the ${client.user.tag}!`);
+  createLog(
+    LogVariant.INFORMATION,
+    'Bot information',
+    `${totalMemberCount} member have access to the ${client.user.tag}!`
+  );
 
   // Check if latest_patch.json exists
   if (!fs.existsSync('./src/latest_patch.json'))
@@ -71,18 +78,26 @@ client.on('ready', () => {
           dota
             .getLatestPatchNoteVersion()
             .then((version) => {
+              createLog(
+                LogVariant.INFORMATION,
+                'Fetching4Patches',
+                'Checking for new Dota patches...'
+              );
               if (patch === version) {
-                helper.log('No new Dota patch avaiable!');
+                createLog(
+                  LogVariant.INFORMATION,
+                  'Fetching4Patches',
+                  'No new Dota-patch avaiable!'
+                );
                 return;
               }
 
               dota.getLatestPatchNote().then(async (patchNote) => {
-                helper.log(`New Dota patch ${patchNote.patch_name} is avaiable!`);
-                if (PRODUCTION)
-                  logger.log(
-                    log.INFORMATION,
-                    `New Dota patch ${patchNote.patch_name} is avaiable!`
-                  );
+                createLog(
+                  LogVariant.INFORMATION,
+                  'Fetching4Patches',
+                  `New Dota patch ${patchNote.patch_name} is avaiable!`
+                );
 
                 // Send notification and changelog
                 client.guilds.cache.forEach((guild) => {
@@ -100,11 +115,12 @@ client.on('ready', () => {
                 );
               });
             })
-            .catch((err) => console.log('ERROR: ' + err));
+            .catch((err) => {
+              throw err;
+            });
         });
       } catch (error) {
-        helper.error(error);
-        if (PRODUCTION) logger.log(log.ERROR, 'Fetching4Patches', error);
+        createLog(LogVariant.ERROR, 'Fetching4Patches', error);
       }
     }
   );
@@ -160,9 +176,11 @@ client.on('ready', () => {
               latestSentArticle &&
               JSON.stringify(latestSentArticle) == JSON.stringify(generateKey(gid, date))
             ) {
-              let msg = `There is no new article for Dota 2. (Latest article: ${gid})`;
-              helper.log(msg);
-              if (PRODUCTION) logger.log(log.INFORMATION, 'Message', msg);
+              createLog(
+                LogVariant.ERROR,
+                'Fetching4Articles',
+                `There is no new article for Dota 2. (Latest article: ${gid})`
+              );
               return;
             }
 
@@ -215,13 +233,18 @@ client.on('ready', () => {
                     embeds: [embed],
                   })
                   .then(() => {
-                    let msg = `Send news notification on Guild ${guild.name}!`;
-                    helper.log(msg);
-                    if (PRODUCTION) logger.log(log.INFORMATION, 'Message sent', msg);
+                    createLog(
+                      LogVariant.INFORMATION,
+                      'Fetching4Articles',
+                      `Send news notification on Guild ${guild.name}!`
+                    );
                   })
                   .catch((err) => {
-                    helper.error('Failed to send news-notifcation cause of:\n' + err);
-                    if (PRODUCTION) logger.log(log.ERROR, 'Message sent failed', err);
+                    createLog(
+                      LogVariant.ERROR,
+                      'Fetching4Articles',
+                      'Failed to send news-notifcation cause of:\n' + err
+                    );
                   });
               }
             });
@@ -240,8 +263,7 @@ client.on('ready', () => {
           });
       });
     } catch (err) {
-      if (PRODUCTION) logger.log(log.ERROR, 'Fetching news', err);
-      helper.error(err);
+      createLog(LogVariant.ERROR, 'Fetching4Articles', err);
     }
   });
 
@@ -259,14 +281,13 @@ client.on('ready', () => {
 });
 
 client.on('guildCreate', (guild) => {
-  if (PRODUCTION)
-    logger.log(
-      log.INFORMATION,
-      'Joined guild',
-      `Joined the guild \`${guild.name}\`(${guild.memberCount} ${
-        guild.memberCount > 1 ? 'members' : 'member'
-      })`
-    );
+  createLog(
+    LogVariant.INFORMATION,
+    'Joined guild',
+    `Joined the guild \`${guild.name}\`(${guild.memberCount} ${
+      guild.memberCount > 1 ? 'members' : 'member'
+    })`
+  );
 
   // Check if the required role & channels exists
   // If not we're gonna create them
@@ -274,12 +295,11 @@ client.on('guildCreate', (guild) => {
 });
 
 client.on('guildDelete', (guild) => {
-  if (PRODUCTION)
-    logger.log(
-      log.INFORMATION,
-      'Left guild',
-      `Left the guild \`${guild.name}\`(${guild.memberCount} member)`
-    );
+  createLog(
+    LogVariant.INFORMATION,
+    'Left guild',
+    `Left the guild \`${guild.name}\`(${guild.memberCount} member)`
+  );
 });
 
 client.on('messageCreate', (msg) => {
@@ -287,12 +307,11 @@ client.on('messageCreate', (msg) => {
 
   const messageContent = msg.content;
   if (messageContent.substring(0, commands.prefix.length) !== commands.prefix) return;
-  if (PRODUCTION)
-    logger.log(
-      log.INFORMATION,
-      'Use command',
-      `${msg.author.tag} tried using command ${msg.content}`
-    );
+  createLog(
+    LogVariant.INFORMATION,
+    'Use command',
+    `${msg.author.tag} tried using command ${msg.content}`
+  );
 
   const action = messageContent.split(/ /g)[1];
   switch (action) {
@@ -311,12 +330,11 @@ client.on('messageCreate', (msg) => {
       const guildMembers = guild.members.cache;
       const authorAsGuildMember = guildMembers.find((member) => member.user.tag === msg.author.tag);
       if (!authorAsGuildMember) {
-        if (PRODUCTION)
-          logger.log(
-            log.ERROR,
-            'Bot setup',
-            `\`${msg.author.tag}\` isn't a guild member of \`${guild.name}\``
-          );
+        createLog(
+          LogVariant.ERROR,
+          'Bot setup',
+          `\`${msg.author.tag}\` isn't a guild member of \`${guild.name}\``
+        );
         msg.reply('something went wrong!');
       }
 
@@ -327,11 +345,10 @@ client.on('messageCreate', (msg) => {
           Discord.Permissions.FLAGS.MANAGE_ROLES,
         ])
       ) {
-        if (PRODUCTION)
-          helper.error(
-            'Missing permissions',
-            `\`${authorAsGuildMember.tag}\` doesn't have the required permissions for the bot setup!`
-          );
+        createLog(
+          'Missing permissions',
+          `\`${authorAsGuildMember.tag}\` doesn't have the required permissions for the bot setup!`
+        );
         msg.reply("you don't have permissions to manage roles and channels on this guild!");
       }
 
