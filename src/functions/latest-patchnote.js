@@ -109,7 +109,7 @@ const sendLatestPatchNotification = (guild) => {
         })
           .then(() => {
             createLog(
-              LogVariant.INFORMATION,
+              LogVariant.LOG,
               'Message sent',
               `Send patch notification on Guild ${guild.name}!`
             );
@@ -214,7 +214,7 @@ const sendLatestPatchChangelog = (guild) => {
             .send(splittedMessage)
             .then(() => {
               createLog(
-                LogVariant.INFORMATION,
+                LogVariant.LOG,
                 'Message sent',
                 `Send patch changelogs on Guild ${guild.name}`
               );

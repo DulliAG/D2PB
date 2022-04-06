@@ -24,12 +24,12 @@ const setupRolesAndChannelsForSpecificGuild = (guild) => {
       })
       .then(() => {
         createLog(
-          LogVariant.INFORMATION,
+          LogVariant.LOG,
           'Create role',
           `Created role \`${message.role_name}\` for guild \`${guild.name}\``
         );
       })
-      .catch((err) => createLog(LogVariant.INFORMATION, 'Create role', err));
+      .catch((err) => createLog(LogVariant.ERROR, 'Create role', err));
   }
 
   // Create all requried channels for each category
@@ -46,7 +46,7 @@ const setupRolesAndChannelsForSpecificGuild = (guild) => {
         })
         .then(() => {
           createLog(
-            LogVariant.INFORMATION,
+            LogVariant.LOG,
             'Create channel',
             `Created channel \`${channel.name}\` for guild \`${guild.name}\``
           );

@@ -78,11 +78,7 @@ client.on('ready', () => {
           dota
             .getLatestPatchNoteVersion()
             .then((version) => {
-              createLog(
-                LogVariant.INFORMATION,
-                'Fetching4Patches',
-                'Checking for new Dota patches...'
-              );
+              createLog(LogVariant.LOG, 'Fetching4Patches', 'Checking for new Dota patches...');
               if (patch === version) {
                 createLog(
                   LogVariant.INFORMATION,
@@ -177,7 +173,7 @@ client.on('ready', () => {
               JSON.stringify(latestSentArticle) == JSON.stringify(generateKey(gid, date))
             ) {
               createLog(
-                LogVariant.ERROR,
+                LogVariant.WARNING,
                 'Fetching4Articles',
                 `There is no new article for Dota 2. (Latest article: ${gid})`
               );
@@ -234,7 +230,7 @@ client.on('ready', () => {
                   })
                   .then(() => {
                     createLog(
-                      LogVariant.INFORMATION,
+                      LogVariant.LOG,
                       'Fetching4Articles',
                       `Send news notification on Guild ${guild.name}!`
                     );
@@ -282,7 +278,7 @@ client.on('ready', () => {
 
 client.on('guildCreate', (guild) => {
   createLog(
-    LogVariant.INFORMATION,
+    LogVariant.LOG,
     'Joined guild',
     `Joined the guild \`${guild.name}\`(${guild.memberCount} ${
       guild.memberCount > 1 ? 'members' : 'member'
@@ -296,7 +292,7 @@ client.on('guildCreate', (guild) => {
 
 client.on('guildDelete', (guild) => {
   createLog(
-    LogVariant.INFORMATION,
+    LogVariant.LOG,
     'Left guild',
     `Left the guild \`${guild.name}\`(${guild.memberCount} member)`
   );
@@ -307,11 +303,7 @@ client.on('messageCreate', (msg) => {
 
   const messageContent = msg.content;
   if (messageContent.substring(0, commands.prefix.length) !== commands.prefix) return;
-  createLog(
-    LogVariant.INFORMATION,
-    'Use command',
-    `${msg.author.tag} tried using command ${msg.content}`
-  );
+  createLog(LogVariant.LOG, 'Use command', `${msg.author.tag} tried using command ${msg.content}`);
 
   const action = messageContent.split(/ /g)[1];
   switch (action) {
@@ -331,7 +323,7 @@ client.on('messageCreate', (msg) => {
       const authorAsGuildMember = guildMembers.find((member) => member.user.tag === msg.author.tag);
       if (!authorAsGuildMember) {
         createLog(
-          LogVariant.ERROR,
+          LogVariant.WARNING,
           'Bot setup',
           `\`${msg.author.tag}\` isn't a guild member of \`${guild.name}\``
         );
@@ -346,6 +338,7 @@ client.on('messageCreate', (msg) => {
         ])
       ) {
         createLog(
+          LogVariant.WARNING,
           'Missing permissions',
           `\`${authorAsGuildMember.tag}\` doesn't have the required permissions for the bot setup!`
         );
