@@ -4,7 +4,7 @@
     "background_tasks": {
       "FETCHING_PATCHES": {
         "enabled": true,
-        "execution_pattern": "*/30 * * * *"
+        "execution_pattern": "*/10 * * * *"
       },
       "FETCHING_NEWS": {
         "enabled": false,
