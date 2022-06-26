@@ -15,9 +15,9 @@ jobs:
       - uses: actions/checkout@v3
       - name: Build Docker image
         run: |
-          docker build --build-arg NPM_TOKEN=${NPM_TOKEN} . -t ghcr.io/dulliag/d2pb:${{ github.ref_name }}
+          docker build --build-arg NPM_TOKEN=${NPM_TOKEN} . -t ghcr.io/dulliag/d2pb:latest
           mkdir -p artifacts
-          docker save ghcr.io/dulliag/d2pb:${{ github.ref_name }} > artifacts/docker-image.tar
+          docker save ghcr.io/dulliag/d2pb:latest > artifacts/docker-image.tar
         env:
           NPM_TOKEN: ${{ secrets.READ_PAT }}
 
@@ -33,7 +33,7 @@ jobs:
     name: Publish Docker image
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Retrieve saved Docker image
         uses: actions/download-artifact@v2
         with:
@@ -47,11 +47,11 @@ jobs:
 
       - name: Login
         run: |
-          echo ${{ secrets.PAT }} | docker login ghcr.io -u ${{ secrets.DOCKER_USER }} --password-stdin
+          echo ${{ secrets.WRITE_PAT }} | docker login ghcr.io -u ${{ secrets.DOCKER_USER }} --password-stdin
 
       - name: Push Docker image
         run: |
-          docker push ghcr.io/dulliag/d2pb:${{github.ref_name}}
+          docker push ghcr.io/dulliag/d2pb:latest
 
   deploy_image:
     needs: publish_image
@@ -66,9 +66,9 @@ jobs:
           password: ${{ secrets.SSH_PASSWORD }}
           port: 22
           script: |
-            echo ${{ secrets.WRITE_PAT }} | docker login ghcr.io -u ${{ secrets.DOCKER_USER }} --password-stdin
+            echo ${{ secrets.READ_PAT }} | docker login ghcr.io -u ${{ secrets.DOCKER_USER }} --password-stdin
             docker container stop d2pb
             docker container rm d2pb
-            docker image rm ghcr.io/dulliag/d2pb:${{ github.ref_name }}
-            docker pull ghcr.io/dulliag/d2pb:${{ github.ref_name }}
-            docker run -itd --restart unless-stopped --name=d2pb ghcr.io/dulliag/d2pb:${{ github.ref_name }}
+            docker image rm ghcr.io/dulliag/d2pb:latest
+            docker pull ghcr.io/dulliag/d2pb:latest
+            docker run -itd --restart unless-stopped --name=d2pb ghcr.io/dulliag/d2pb:latest
