@@ -3,11 +3,11 @@
     "activity": "Checking for Dota2 patches and news!",
     "background_tasks": {
       "FETCHING_PATCHES": {
-        "enabled": false,
-        "execution_pattern": "*/30 * * * *"
+        "enabled": true,
+        "execution_pattern": "*/10 * * * *"
       },
       "FETCHING_NEWS": {
-        "enabled": false,
+        "enabled": true,
         "execution_pattern": "*/10 * * * *"
       }
     }

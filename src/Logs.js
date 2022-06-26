@@ -1,5 +1,4 @@
 const { Database, LogVariant, Client } = require('@dulliag/logger.js');
-const helper = require('@dulliag/discord-helper');
 require('dotenv').config();
 
 try {
@@ -19,9 +18,7 @@ try {
    * @param {string} message
    */
   const createLog = (variant, code, message) => {
-    if (process.env.PRODUCTION == 'true') {
-      LOGGER.log(variant, code, message);
-    }
+    return LOGGER.log(variant, code, message);
   };
 
   module.exports = {

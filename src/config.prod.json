@@ -7,7 +7,7 @@
         "execution_pattern": "*/10 * * * *"
       },
       "FETCHING_NEWS": {
-        "enabled": false,
+        "enabled": true,
         "execution_pattern": "*/10 * * * *"
       }
     }

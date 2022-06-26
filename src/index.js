@@ -2,9 +2,19 @@ require('dotenv').config();
 const Discord = require('discord.js');
 const client = new Discord.Client({ intents: ['GUILDS', 'GUILD_MESSAGES'] });
 const cron = require('cron').CronJob;
-const fs = require('fs');
 const helper = require('@dulliag/discord-helper');
 const fetch = require('node-fetch');
+const { supabase } = require('./supabase');
+
+/**
+ *
+ * @param {string} gid
+ * @param {string} date
+ * @returns string
+ */
+const generateKey = (gid, date) => {
+  return `${gid}+-+${date}`;
+};
 
 // Classes & functions
 const { LogVariant } = require('@dulliag/logger.js');
@@ -58,210 +68,166 @@ client.on('ready', () => {
     `${totalMemberCount} member have access to the ${client.user.tag}!`
   );
 
-  // Check if latest_patch.json exists
-  if (!fs.existsSync('./src/latest_patch.json'))
-    fs.writeFileSync('./src/latest_patch.json', JSON.stringify({ patch: '' }));
-
-  // Check if latest_article.json exists
-  if (!fs.existsSync('./src/latest_article.json'))
-    fs.writeFileSync('./src/latest_article.json', JSON.stringify({ article: '' }));
-
   const TASK_FETCH_PATCHES = new cron(
     bot.background_tasks.FETCHING_PATCHES.execution_pattern,
     async () => {
       try {
-        fs.readFile('./src/latest_patch.json', 'utf-8', (err, data) => {
-          if (err) throw err;
-          const latestPatchFile = JSON.parse(data),
-            patch = latestPatchFile.patch;
+        let latestProcessedPatch, latestPatchNoteVersion, latestPatchNote;
+        const { data, error } = await supabase
+          .from('d2pb_config')
+          .select('version')
+          .eq('type', 'LATEST_PATCH');
+        if (error) throw error;
 
-          dota
-            .getLatestPatchNoteVersion()
-            .then((version) => {
-              createLog(LogVariant.LOG, 'Fetching4Patches', 'Checking for new Dota patches...');
-              if (patch === version) {
-                createLog(
-                  LogVariant.INFORMATION,
-                  'Fetching4Patches',
-                  'No new Dota-patch avaiable!'
-                );
-                return;
-              }
+        latestProcessedPatch = data[0].version;
+        latestPatchNoteVersion = await dota.getLatestPatchNoteVersion();
+        if (latestProcessedPatch === latestPatchNoteVersion) return; // latest is 7.31d
+        latestPatchNote = await dota.getLatestPatchNote();
+        createLog(
+          LogVariant.INFORMATION,
+          'Patch Notification',
+          `New Dota patch ${latestPatchNote.patch_name} is avaiable!`
+        );
 
-              dota.getLatestPatchNote().then(async (patchNote) => {
-                createLog(
-                  LogVariant.INFORMATION,
-                  'Fetching4Patches',
-                  `New Dota patch ${patchNote.patch_name} is avaiable!`
-                );
-
-                // Send notification and changelog
-                client.guilds.cache.forEach((guild) => {
-                  sendLatestPatchChangelog(guild);
-                  sendLatestPatchNotification(guild);
-                });
-
-                // Update local file
-                fs.writeFile(
-                  './src/latest_patch.json',
-                  JSON.stringify({ patch: patchNote.patch_name }),
-                  (err) => {
-                    if (err) throw err;
-                  }
-                );
-              });
-            })
-            .catch((err) => {
-              throw err;
-            });
+        // Send notification and changelog
+        client.guilds.cache.forEach((guild) => {
+          sendLatestPatchChangelog(guild);
+          sendLatestPatchNotification(guild);
         });
+
+        // Update latest served patch-version on our database
+        let { error1 } = await supabase
+          .from('d2pb_config')
+          .update({ version: latestPatchNote.patch_name })
+          .match({ type: 'LATEST_PATCH' });
+        if (error1) throw error1;
+        createLog(
+          LogVariant.INFORMATION,
+          'Patch Notification',
+          `Patch ${latestPatchNote.patch_name} successfully processed!`
+        );
       } catch (error) {
-        createLog(LogVariant.ERROR, 'Fetching4Patches', error);
+        createLog(LogVariant.ERROR, 'Patch Notification', error);
       }
     }
   );
 
-  const TASK_FETCH_NEWS = new cron(bot.background_tasks.FETCHING_NEWS.execution_pattern, () => {
-    try {
-      fs.readFile('./src/latest_article.json', 'utf-8', (err, data) => {
-        if (err) throw err;
-        const latestArticleFile = JSON.parse(data),
-          latestSentArticle = latestArticleFile.article;
-
-        fetch(`https://api.steampowered.com/ISteamNews/GetNewsForApp/v2/?appid=${DOTA_APP_ID}`)
+  const TASK_FETCH_NEWS = new cron(
+    bot.background_tasks.FETCHING_NEWS.execution_pattern,
+    async () => {
+      try {
+        let latestProcessedArticle, latestArticleId, latestArticle;
+        const { data, error } = await supabase
+          .from('d2pb_config')
+          .select('version')
+          .eq('type', 'LATEST_ARTICLE');
+        if (error) throw error;
+        latestProcessedArticle = data[0].version;
+        latestArticle = await fetch(
+          'https://api.steampowered.com/ISteamNews/GetNewsForApp/v2/?appid=' + DOTA_APP_ID
+        )
           .then((response) => response.json())
-          .then((json) => {
-            const articles = json.appnews.newsitems;
-            const latestArticle = articles[0];
-            const {
-              gid,
-              title,
-              url,
-              is_external_url,
-              author,
-              contents,
-              feedlabel,
-              date,
-              feedname,
-              feed_type,
-              appid,
-              tags = [],
-            } = latestArticle;
-
-            /**
-             *
-             * @param {string} gid
-             * @param {string} date
-             * @returns string
-             */
-            const generateKey = (gid, date) => {
-              return `${gid}+-+${date}`;
-            };
-
-            /**
-             *
-             * @param {string} gid
-             * @param {string} date
-             * @returns object
-             */
-            const generateArticleJson = (gid, date) => {
-              return { article: generateKey(gid, date) };
-            };
-
-            if (
-              latestSentArticle &&
-              JSON.stringify(latestSentArticle) == JSON.stringify(generateKey(gid, date))
-            ) {
-              createLog(
-                LogVariant.WARNING,
-                'Fetching4Articles',
-                `There is no new article for Dota 2. (Latest article: ${gid})`
-              );
-              return;
-            }
-
-            // Send news notification
-            const parsedDate = new Date(date * 1000); // transform UNIX-timestamp
-            client.guilds.cache.forEach((guild) => {
-              const newsChannel = guild.channels.cache.find(
-                (guildChannel) =>
-                  guildChannel.isText &&
-                  guildChannel.name.toLowerCase() ===
-                    message.channels
-                      .find((channel) => channel.id === 'DOTA_NEWS')
-                      .name.toLowerCase()
-              );
-              if (newsChannel) {
-                // Prepare patch notification message
-                const role = guild.roles.cache.find(
-                  (role) => role.name.toLowerCase() === message.role_name.toLocaleLowerCase()
-                );
-
-                // Prepare embed
-                const embed = {
-                  color: 0x0099ff,
-                  title: title,
-                  url: url.replace(/ /g, '%20'),
-                  author: {
-                    name: author,
-                  },
-                  timestamp: parsedDate,
-                  fields: [
-                    {
-                      name: 'Provider',
-                      value: feedlabel,
-                      inline: true,
-                    },
-                    {
-                      name: 'Tags',
-                      value:
-                        tags.length > 0
-                          ? tags.reduce((prev, cur) => (prev += '`' + cur + '` '), '')
-                          : 'None',
-                      inline: true,
-                    },
-                  ],
-                };
-
-                newsChannel
-                  .send({
-                    content: role ? `${role}\n **New Dota 2 article**` : `**New Dota 2a article**`,
-                    embeds: [embed],
-                  })
-                  .then(() => {
-                    createLog(
-                      LogVariant.LOG,
-                      'Fetching4Articles',
-                      `Send news notification on Guild ${guild.name}!`
-                    );
-                  })
-                  .catch((err) => {
-                    createLog(
-                      LogVariant.ERROR,
-                      'Fetching4Articles',
-                      'Failed to send news-notifcation cause of:\n' + err
-                    );
-                  });
-              }
-            });
-
-            // Update local file
-            fs.writeFile(
-              './src/latest_article.json',
-              JSON.stringify(generateArticleJson(gid, date)),
-              (err) => {
-                if (err) throw err;
-              }
-            );
-          })
+          .then((json) => json.appnews.newsitems[0])
           .catch((err) => {
             throw err;
           });
-      });
-    } catch (err) {
-      createLog(LogVariant.ERROR, 'Fetching4Articles', err);
+
+        const {
+          gid,
+          title,
+          url,
+          is_external_url,
+          author,
+          contents,
+          feedlabel,
+          date,
+          feedname,
+          feed_type,
+          appid,
+          tags = [],
+        } = latestArticle;
+        latestArticleId = generateKey(gid, date);
+        if (latestProcessedArticle === latestArticleId) return;
+
+        // Send news notification
+        const parsedDate = new Date(date * 1000); // transform UNIX-timestamp
+        client.guilds.cache.forEach((guild) => {
+          const newsChannel = guild.channels.cache.find(
+            (guildChannel) =>
+              guildChannel.isText &&
+              guildChannel.name.toLowerCase() ===
+                message.channels.find((channel) => channel.id === 'DOTA_NEWS').name.toLowerCase()
+          );
+          if (newsChannel) {
+            // Prepare patch notification message
+            const role = guild.roles.cache.find(
+              (role) => role.name.toLowerCase() === message.role_name.toLocaleLowerCase()
+            );
+
+            // Prepare embed
+            const embed = {
+              color: 0x0099ff,
+              title: title,
+              url: url.replace(/ /g, '%20'),
+              author: {
+                name: author,
+              },
+              timestamp: parsedDate,
+              fields: [
+                {
+                  name: 'Provider',
+                  value: feedlabel,
+                  inline: true,
+                },
+                {
+                  name: 'Tags',
+                  value:
+                    tags.length > 0
+                      ? tags.reduce((prev, cur) => (prev += '`' + cur + '` '), '')
+                      : 'None',
+                  inline: true,
+                },
+              ],
+            };
+
+            newsChannel
+              .send({
+                content: role ? `${role}\n **New Dota 2 article**` : `**New Dota 2a article**`,
+                embeds: [embed],
+              })
+              .then(() => {
+                createLog(
+                  LogVariant.LOG,
+                  'Article Notifications',
+                  `Send article notification on Guild ${guild.name}!`
+                );
+              })
+              .catch((err) => {
+                createLog(
+                  LogVariant.ERROR,
+                  'Article Notifications',
+                  'Failed to send article-notifcation cause of:\n' + err
+                );
+              });
+          }
+        });
+
+        // Update latest served article on our database
+        let { error1 } = await supabase
+          .from('d2pb_config')
+          .update({ version: latestArticleId })
+          .match({ type: 'LATEST_ARTICLE' });
+        if (error1) throw error1;
+        createLog(
+          LogVariant.INFORMATION,
+          'Article Notifications',
+          `Article ${gid} successfully processed!`
+        );
+      } catch (err) {
+        createLog(LogVariant.ERROR, 'Article Notifications', err);
+      }
     }
-  });
+  );
 
   // Only start patch checking if we have them enabled in the config
   if (bot.background_tasks.FETCHING_PATCHES.enabled) {
@@ -394,10 +360,11 @@ client.on('messageCreate', (msg) => {
           '`latest-changelog` `changelog` - Get the latest changelog\n' +
           '`latest-patch` `patch` - Get the latest patch\n' +
           '`version` - Get the current version\n' +
-          '`setup` - Create required roles and channels for this bot\n'
+          '`setup` - Create required roles and channels for this bot\n' +
+          '`stats` - Get bot statistics\n'
       );
       break;
   }
 });
 
-client.login(process.env.BOT_TOKEN);
+client.login(PRODUCTION ? process.env.BOT_TOKEN : process.env.DEV_BOT_TOKEN);
