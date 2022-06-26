@@ -1,0 +1,74 @@
+name: Publish Docker image
+
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+  workflow_dispatch:
+
+jobs:
+  build_image:
+    name: Build Docker image
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v3
+      - name: Build Docker image
+        run: |
+          docker build --build-arg NPM_TOKEN=${NPM_TOKEN} . -t ghcr.io/dulliag/d2pb:${{ github.ref_name }}
+          mkdir -p artifacts
+          docker save ghcr.io/dulliag/d2pb:${{ github.ref_name }} > artifacts/docker-image.tar
+        env:
+          NPM_TOKEN: ${{ secrets.READ_PAT }}
+
+      - name: Save Docker image
+        uses: actions/upload-artifact@v2
+        with:
+          name: docker-artifact
+          path: artifacts
+          retention-days: 1
+
+  publish_image:
+    needs: build_image
+    name: Publish Docker image
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Retrieve saved Docker image
+        uses: actions/download-artifact@v2
+        with:
+          name: docker-artifact
+          path: artifacts
+
+      - name: Load Docker image
+        run: |
+          cd artifacts
+          docker load < docker-image.tar
+
+      - name: Login
+        run: |
+          echo ${{ secrets.PAT }} | docker login ghcr.io -u ${{ secrets.DOCKER_USER }} --password-stdin
+
+      - name: Push Docker image
+        run: |
+          docker push ghcr.io/dulliag/d2pb:${{github.ref_name}}
+
+  deploy_image:
+    needs: publish_image
+    name: Deploy image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to server
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SERVER }}
+          username: ${{ secrets.SSH_USERNAME }}
+          password: ${{ secrets.SSH_PASSWORD }}
+          port: 22
+          script: |
+            echo ${{ secrets.WRITE_PAT }} | docker login ghcr.io -u ${{ secrets.DOCKER_USER }} --password-stdin
+            docker container stop d2pb
+            docker container rm d2pb
+            docker image rm ghcr.io/dulliag/d2pb:${{ github.ref_name }}
+            docker pull ghcr.io/dulliag/d2pb:${{ github.ref_name }}
+            docker run -itd --restart unless-stopped --name=d2pb ghcr.io/dulliag/d2pb:${{ github.ref_name }}

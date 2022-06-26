@@ -1,9 +1,16 @@
 FROM node:alpine
 
-WORKDIR /var/www/DockerDota2PatchBot
+LABEL org.opencontainers.image.source https://github.com/DulliAG/Dota2PatchBot
 
-Copy . .
+WORKDIR /usr/src/dota2patchbot/
 
-Run npm i
+ARG NPM_TOKEN
+COPY .npmrc .npmrc
+COPY package*.json ./
+
+RUN npm install
+RUN rm -f .npmrc
+
+COPY . .
 
 CMD ["npm", "start"]
