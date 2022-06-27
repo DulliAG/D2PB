@@ -2,7 +2,6 @@ require('dotenv').config();
 const Discord = require('discord.js');
 const client = new Discord.Client({ intents: ['GUILDS', 'GUILD_MESSAGES'] });
 const cron = require('cron').CronJob;
-const helper = require('@dulliag/discord-helper');
 const fetch = require('node-fetch');
 const { supabase } = require('./supabase');
 
@@ -18,7 +17,7 @@ const generateKey = (gid, date) => {
 
 // Classes & functions
 const { LogVariant } = require('@dulliag/logger.js');
-const { logger, createLog } = require('./Logs');
+const { createLog } = require('./Logs');
 const Dota2 = require('./Dota2');
 const dota = new Dota2();
 const {
@@ -36,13 +35,15 @@ const PRODUCTION = process.env.PRODUCTION == 'true';
 const { version } = require('../package.json');
 const { bot, commands, message } = require(`./config.${PRODUCTION ? 'prod' : 'dev'}.json`);
 
-client.on('ready', () => {
+client.on('ready', async () => {
   // Logging
-  helper.log(`Logged in as ${client.user.tag}!`);
+  await createLog(LogVariant.LOG, 'Starting', `Logged in as ${client.user.tag}!`);
   if (PRODUCTION) {
-    helper.log(`${client.user.tag} v${version} is running in production mode!`);
-    logger.application = client.user.username;
-    logger.log(LogVariant.INFORMATION, 'Bot started', `${client.user.tag} started!`);
+    await createLog(
+      LogVariant.INFORMATION,
+      'Starting',
+      `${client.user.tag} v${version} is running in production mode!`
+    );
   }
 
   // Run bot setup
@@ -265,7 +266,7 @@ client.on('guildDelete', (guild) => {
 });
 
 client.on('messageCreate', (msg) => {
-  if (helper.isBot(msg.author)) return;
+  if (msg.author.bot) return;
 
   const messageContent = msg.content;
   if (messageContent.substring(0, commands.prefix.length) !== commands.prefix) return;

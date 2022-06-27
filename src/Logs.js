@@ -9,7 +9,7 @@ try {
     database: process.env.DB_DATABASE,
   };
 
-  const LOGGER = new Client(Database.PG, credentials, 'Dota2PatchBot');
+  const LOGGER = new Client(Database.PG, credentials, process.env.APPLICATION);
 
   /**
    *
@@ -22,8 +22,6 @@ try {
   };
 
   module.exports = {
-    log: LogVariant,
-    logger: LOGGER,
     createLog: createLog,
   };
 } catch (err) {
