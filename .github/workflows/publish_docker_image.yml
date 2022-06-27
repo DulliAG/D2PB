@@ -13,13 +13,30 @@ jobs:
     environment: production
     steps:
       - uses: actions/checkout@v3
+      - name: Create `.env`-file
+        uses: SpicyPizza/create-envfile@v1.3
+        with:
+          envkey_PRODUCTION: ${{ secrets.PRODUCTION }}
+          envkey_APPLICATION: ${{ secrets.APPLICATION }}
+          envkey_BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+          envkey_BOT_DEV_TOKEN: ${{ secrets.DEV_BOT_TOKEN }}
+          envkey_DB_HOST: ${{ secrets.DB_HOST }}
+          envkey_DB_USER: ${{ secrets.DB_USER }}
+          envkey_DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          envkey_DB_DATABASE: ${{ secrets.DB_DATABASE }}
+          envkey_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          envkey_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+
       - name: Build Docker image
         run: |
-          docker build --build-arg NPM_TOKEN=${NPM_TOKEN} . -t ghcr.io/dulliag/d2pb:latest
+          rm .npmrc 
+          echo $'@dulliag:registry=https://npm.pkg.github.com\n//npm.pkg.github.com/:_authToken='$NPM_TOKEN >> .npmrc
+          docker build --secret id=npm,src=.npmrc . -t ghcr.io/dulliag/d2pb:${{ github.ref_name }}
           mkdir -p artifacts
-          docker save ghcr.io/dulliag/d2pb:latest > artifacts/docker-image.tar
+          docker save ghcr.io/dulliag/d2pb:${{ github.ref_name }} > artifacts/docker-image.tar
         env:
-          NPM_TOKEN: ${{ secrets.READ_PAT }}
+          DOCKER_BUILDKIT: 1
+          NPM_TOKEN: ${{ secrets.PAT }}
 
       - name: Save Docker image
         uses: actions/upload-artifact@v2
@@ -28,12 +45,11 @@ jobs:
           path: artifacts
           retention-days: 1
 
-  publish_image:
+  push_image:
     needs: build_image
-    name: Publish Docker image
+    name: Push Docker image
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
       - name: Retrieve saved Docker image
         uses: actions/download-artifact@v2
         with:
@@ -47,18 +63,24 @@ jobs:
 
       - name: Login
         run: |
-          echo ${{ secrets.WRITE_PAT }} | docker login ghcr.io -u ${{ secrets.DOCKER_USER }} --password-stdin
+          echo ${{ secrets.PAT }} | docker login ghcr.io -u ${{ secrets.DOCKER_USER }} --password-stdin
 
       - name: Push Docker image
         run: |
-          docker push ghcr.io/dulliag/d2pb:latest
+          docker push ghcr.io/dulliag/d2pb:${{ github.ref_name }}
+
+      - name: Delete artifact
+        uses: geekyeggo/delete-artifact@v1
+        with:
+          name: docker-artifact
 
   deploy_image:
-    needs: publish_image
-    name: Deploy image
+    needs: push_image
+    name: Deploy Docker image to server
     runs-on: ubuntu-latest
+    environment: production
     steps:
-      - name: Deploy to server
+      - name: Connect and deploy
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.SERVER }}
@@ -66,9 +88,10 @@ jobs:
           password: ${{ secrets.SSH_PASSWORD }}
           port: 22
           script: |
-            echo ${{ secrets.READ_PAT }} | docker login ghcr.io -u ${{ secrets.DOCKER_USER }} --password-stdin
+            echo ${{ secrets.PAT }} | docker login ghcr.io -u ${{ secrets.DOCKER_USER }} --password-stdin
             docker container stop d2pb
             docker container rm d2pb
             docker image rm ghcr.io/dulliag/d2pb:latest
-            docker pull ghcr.io/dulliag/d2pb:latest
-            docker run -itd --restart unless-stopped --name=d2pb ghcr.io/dulliag/d2pb:latest
+            docker pull ghcr.io/dulliag/d2pb:${{ github.ref_name }}
+            docker tag ghcr.io/dulliag/d2pb:${{ github.ref_name }} ghcr.io/dulliag/d2pb:latest
+            docker run -itd --restart on-failure:3 --name=d2pb ghcr.io/dulliag/d2pb:latest

@@ -1,15 +1,12 @@
 FROM node:alpine
 
-LABEL org.opencontainers.image.source https://github.com/DulliAG/Dota2PatchBot
+LABEL org.opencontainers.image.source https://github.com/DulliAG/D2PB
 
-WORKDIR /usr/src/dota2patchbot/
+WORKDIR /usr/src/d2pb/
 
-ARG NPM_TOKEN
-COPY .npmrc .npmrc
 COPY package*.json ./
 
-RUN npm install
-RUN rm -f .npmrc
+RUN --mount=type=secret,id=npm,target=.npmrc npm install
 
 COPY . .
 
